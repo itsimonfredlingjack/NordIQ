@@ -1,0 +1,44 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Node (om något byggs i framtiden)
+node_modules/
+dist/
+build/
+
+# Python (om något byggs i framtiden)
+__pycache__/
+*.py[cod]
+.env
+
+# Mermaid compiled output (behåll bara .mmd-källfiler)
+diagrams/*.svg
+diagrams/*.png
+diagrams/*.pdf

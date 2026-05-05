@@ -1,0 +1,31 @@
+flowchart LR
+    A[📋 Service Snapshot\n01-service-snapshot.md\n\nVad är tjänsten?\nVem använder den?\nUtility & Warranty] --> B
+
+    B[📊 SLO:er & Mätning\n02-service-levels-slo.md\n\nDefinierar framgångsmått\nGo/No-Go-kriterier\nBaseline-mätning] --> C
+
+    C[🛡️ Operational Readiness\n03-operational-readiness.md\n\nDriftmodell klar\nIncident Playbook\nHandover till Anna Berg] --> D
+
+    D[📝 Change & Release RFC\n04-change-release-rfc.md\n\nRFC-NordIQ-001\nTestbevis\nRollback-plan testad] --> E
+
+    E{⚖️ CAB-beslut\n\nAlla go/no-go\nkriterier uppfyllda?}
+
+    E -->|✅ Ja – alla villkor OK| F[🚀 GO-LIVE\nNordIQ produktionssatt]
+    E -->|⚠️ Villkor kvarstår| G[🔄 Begränsad rollout\nPilotgrupp 50 pers\nNytt datum +14 dagar]
+    E -->|❌ Kritiska blockerare| H[🛑 Go-live uppskjuts\nRoot cause åtgärdas\nNy RFC-cykel]
+
+    G --> E
+    H --> A
+
+    F --> I[🩺 Hypercare\nVecka 1–4\nUtökad bemanning\nDaglig SLO-granskning]
+    I --> J[📈 Business as Usual\nMånadsvis CI-möte\nSLO-uppföljning\nLeverantörsstatus]
+
+    style A fill:#e3f2fd,stroke:#2196F3
+    style B fill:#e3f2fd,stroke:#2196F3
+    style C fill:#e3f2fd,stroke:#2196F3
+    style D fill:#e3f2fd,stroke:#2196F3
+    style E fill:#fff9c4,stroke:#F9A825
+    style F fill:#e8f5e9,stroke:#4CAF50
+    style G fill:#fff3e0,stroke:#FF9800
+    style H fill:#ffebee,stroke:#F44336
+    style I fill:#f3e5f5,stroke:#9C27B0
+    style J fill:#e8f5e9,stroke:#4CAF50

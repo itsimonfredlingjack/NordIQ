@@ -1,0 +1,32 @@
+flowchart TD
+    A[👤 Medarbetare\nNordTech AB] -->|Teams / Mejl / Webbportal| B[🤖 NordIQ\nAI-agent]
+
+    B -->|Svar hittades i kunskapsbas| C[✅ Direkt svar\nlevereras]
+    B -->|Okänt ärende eller komplex fråga| D[📋 Strukturerad ticket\nskapas via Lumeon]
+    B -->|P1 eller P2 detekterad| E[🚨 Omedelbar eskalering\ntill människa < 60 s]
+
+    C -->|Medarbetaren bekräftar lösning| F[⭐ Feedback samlas\nNöjdhetsrating]
+    C -->|Ny kunskapslucka| G[📚 Kunskapsbas\nuppdateras]
+
+    D -->|Routa till rätt grupp| H[👥 Second line\neller specialist]
+    H -->|Lösning bekräftad| I[✔️ Ärende stängt\ni Lumeon]
+    I --> G
+
+    E --> J[👤 On-call / Anna Berg\neller Karl Eek]
+    J -->|Löst| I
+    J -->|Eskalera vidare| K[🏢 Leverantör\nCloudFrame / Lumeon]
+    K -->|Löst| I
+
+    G -->|Förbättrar framtida svar| B
+
+    style A fill:#e8f4fd,stroke:#2196F3
+    style B fill:#fff3e0,stroke:#FF9800
+    style C fill:#e8f5e9,stroke:#4CAF50
+    style D fill:#fff3e0,stroke:#FF9800
+    style E fill:#ffebee,stroke:#F44336
+    style F fill:#e8f5e9,stroke:#4CAF50
+    style G fill:#f3e5f5,stroke:#9C27B0
+    style H fill:#e3f2fd,stroke:#2196F3
+    style I fill:#e8f5e9,stroke:#4CAF50
+    style J fill:#fff3e0,stroke:#FF9800
+    style K fill:#fce4ec,stroke:#E91E63
