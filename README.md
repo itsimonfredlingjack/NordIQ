@@ -92,6 +92,12 @@ Paketet ska besvara tre frågor inför CAB:
 | [diagrams/escalation-map.mmd](diagrams/escalation-map.mmd) | Eskaleringskarta |
 | [diagrams/go-live-readiness-flow.mmd](diagrams/go-live-readiness-flow.mmd) | Vägen från snapshot till CAB-beslut |
 
+### App-mockup
+
+| Mapp | Beskrivning |
+|------|-------------|
+| [mockup/](mockup/) | Klickbar single-screen-mockup av medarbetar-yta för NordIQ — Vite + React + TS. Tre auto-spelade scenarier: lösenordsåterställning, konsult-onboarding, NordTrack-incident. Kör med `cd mockup && npm install && npm run dev`. |
+
 ---
 
 > **Antagande:** Alla kostnadsuppgifter, SLA-värden och tidpunkter i detta repo är uppskattningar baserade på rimliga antaganden för en tjänst av NordIQs typ. Gruppen uppmanas att justera dessa värden baserat på tillgänglig information.
