@@ -14,7 +14,7 @@
 **Typ:** Intern IT-tjänst (AI-stödd service desk)  
 **Kanaler:** Microsoft Teams, e-post, webbportal  
 **Tillgänglighet:** 24/7  
-**Målgrupp:** Alla medarbetare på NordTech AB (~800 personer)
+**Målgrupp:** Alla medarbetare på NordTech AB (~450 personer)
 
 ---
 
@@ -30,8 +30,8 @@
 | Martin Lindqvist | Sponsor/CIO | Godkänner go-live, äger budget |
 | Erik Holm | CFO | Granskar kostnad och ROI |
 | Lina Nordin | Head of HR | Berörs av onboarding-flöden |
-| CloudFrame Nordic | Leverantör | Värd för AI-infrastruktur |
-| Lumeon | Leverantör | API för ärendehantering och routing |
+| CloudFrame Nordic | Leverantör | Drift och hosting |
+| Lumeon | Leverantör | LLM-leverantör (AI-API) |
 
 ---
 
@@ -62,14 +62,14 @@
 
 - **Tillgänglighet:** 99,0 % per månad (exkl. planerat underhåll)
 - **Svarstid:** Första svar inom 10 sekunder för 95 % av förfrågningarna
-- **Säkerhet:** Autentisering via Azure AD; ingen PII lagras i AI-kontext
+- **Säkerhet:** Autentisering via [Antagande: Azure AD]; ingen PII lagras i AI-kontext
 - **Spårbarhet:** Alla ärenden loggas med ärendenummer och tidstämplar
 - **Eskalering:** 100 % av P1/P2 eskaleras till människa inom 60 sekunder
 
 ### Risker kopplade till warranty
 
-- Lumeon API-avbrott kan påverka ärendeloggning och routing
-- CloudFrame-driftstörning kan stoppa AI-svarsfunktionen
+- Lumeon API-avbrott kan påverka AI-svarsfunktionen (LLM-leverantör)
+- CloudFrame-driftstörning kan stoppa hela plattformen (hosting)
 - Felaktig NLP-klassificering kan leda till felrouting
 
 ---
@@ -79,6 +79,6 @@
 | Dimension | Beskrivning för NordIQ |
 |-----------|------------------------|
 | **Organisations & People** | Anna Berg äger drift; Karl Eek äger tech; first line och second line ingår i eskaleringskedjan. Lina Nordin involveras för HR-flöden. Rollbeskrivningar och eskaleringsansvar är dokumenterade i [03-operational-readiness.md](03-operational-readiness.md). |
-| **Information & Technology** | AI-motor via CloudFrame Nordic; ärendehantering via Lumeon API; kunskapsbas i SharePoint; autentisering via Azure AD. All data klassificeras enligt NordTechs informationssäkerhetspolicy. Antagande: GDPR-compliance hanteras inom Azure-miljön. |
-| **Partners & Suppliers** | Två kritiska leverantörer: CloudFrame Nordic (AI-infrastruktur) och Lumeon (ärendeintegration). Båda har SLA-avtal. Övervakningsstatus ingår i SLO-uppföljning. Se [risk-register.md](risk-register.md) för leverantörsrisker. |
+| **Information & Technology** | LLM/AI via Lumeon API; drift och hosting via CloudFrame Nordic; kunskapsbas i [Antagande: SharePoint eller motsvarande]; autentisering via [Antagande: Azure AD]. All data klassificeras enligt NordTechs informationssäkerhetspolicy. Antagande: GDPR-compliance hanteras inom molnmiljön. |
+| **Partners & Suppliers** | Två kritiska leverantörer: Lumeon (LLM-leverantör/AI-API) och CloudFrame Nordic (drift och hosting). Båda har SLA-avtal. Övervakningsstatus ingår i SLO-uppföljning. Se [risk-register.md](risk-register.md) för leverantörsrisker. |
 | **Value Streams & Processes** | Primärt flöde: Förfrågan → NordIQ → Direkt svar ELLER strukturerad ticket → Second line → Lösning → Kunskapsbasuppdatering. Incident Management, Problem Management och Continual Improvement är definierade i [03-operational-readiness.md](03-operational-readiness.md). |

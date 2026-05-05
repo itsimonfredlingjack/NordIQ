@@ -29,8 +29,8 @@
 
 | ID | Datum | Beslut | Alternativ övervägda | Beslutsfattare | Motivering | Status |
 |----|-------|--------|----------------------|----------------|------------|--------|
-| B-01 | [datum] | CloudFrame Nordic valdes som AI-leverantör | Azure OpenAI direkt, intern lösning | Karl Eek + Martin Lindqvist | Bäst stöd för svenska NLP; leverantörs-SLA passade kraven | Aktivt |
-| B-02 | [datum] | Lumeon valdes för ärendehantering | ServiceNow, Jira Service Management | Anna Berg + Karl Eek | Befintlig integration i NordTech; lägre implementeringskostnad | Aktivt |
+| B-01 | [datum] | Lumeon API valdes som LLM-leverantör | Azure OpenAI direkt, intern lösning | Karl Eek + Martin Lindqvist | Bäst stöd för svenska NLP; leverantörs-SLA passade kraven | Aktivt |
+| B-02 | [datum] | CloudFrame Nordic valdes för drift och hosting | Azure, intern hosting | Anna Berg + Karl Eek | Befintlig relation med NordTech; rimlig kostnadsbild och SLA | Aktivt |
 | B-03 | [datum] | Go-live med villkor (inte fullständigt godkänt) | Full go-live, uppskjuten go-live | CAB | Risker identifierade men hanterbara; villkor ger kontrollerat go-live | Aktivt |
 
 ---

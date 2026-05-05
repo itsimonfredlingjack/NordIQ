@@ -15,7 +15,7 @@ Paketet är framtaget som beslutsunderlag inför ett CAB-möte (Change Advisory 
 
 ## Case: NordTech AB & NordIQ
 
-**NordTech AB** är ett medelstort teknikföretag med ca 800 medarbetare och en centraliserad IT-organisation. Företaget vill minska trycket på first-line support och förbättra tillgängligheten för medarbetare utanför kontorstid.
+**NordTech AB** är ett medelstort teknikföretag med ca 450 medarbetare och en centraliserad IT-organisation. Företaget vill minska trycket på first-line support och förbättra tillgängligheten för medarbetare utanför kontorstid.
 
 **NordIQ** är en intern AI-stödd service desk som integreras med Teams, mejl och en webbportal. Den hanterar vanliga IT-ärenden dygnet runt och eskalerar strukturerat till rätt supportnivå när det behövs.
 

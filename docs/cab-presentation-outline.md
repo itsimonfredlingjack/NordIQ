@@ -17,9 +17,9 @@
 
 **Punkter:**
 - Intern IT-support via Teams, webbportal och mejl
-- Tillgänglig 24/7 för alla ~800 medarbetare
+- Tillgänglig 24/7 för alla ~450 medarbetare
 - Direktsvar på vanliga frågor; strukturerade eskaleringar vid behov
-- Byggt på CloudFrame Nordic (AI) + Lumeon (ärendehantering)
+- Byggt på Lumeon API (LLM) + CloudFrame Nordic (drift/hosting)
 
 **Speaker notes:**
 > "NordIQ är inte ett chattbot-experiment. Det är en definierad IT-tjänst med tydliga SLO:er, driftansvar och rollback-plan. Vi presenterar den som ett Go-Live Readiness Package, inte som en prototyp."
@@ -47,12 +47,12 @@
 
 **Punkter:**
 - **Nytta:** Tillgänglighet 24/7, deflection 40–60 %, spårbarhet, skalbarhet
-- **Risker:** Lumeon API-stabilitet, AI-feltolkning, adoption
+- **Risker:** CloudFrame-driftstörning, Lumeon API-stabilitet, AI-feltolkning, adoption
 - Alla risker har identifierade åtgärder och ägare
 - Kvarstående residualrisk är acceptabel med villkor
 
 **Speaker notes:**
-> "Vi gömmer inte riskerna. R-02 (CloudFrame-avbrott) är vår allvarligaste risk. Fallback-plan är testad. Vi kan stänga av NordIQ och gå tillbaka till manuell first line inom 15–30 minuter."
+> "Vi gömmer inte riskerna. R-01 (Lumeon API-avbrott) och R-02 (CloudFrame-driftstörning) är våra allvarligaste risker. Fallback-plan är testad. Vi kan stänga av NordIQ och gå tillbaka till manuell first line inom 15–30 minuter."
 
 ---
 
@@ -62,7 +62,7 @@
 
 | SLO | Mål | Mätning |
 |-----|-----|---------|
-| Tillgänglighet | 99,0 % / månad | CloudFrame dashboard |
+| Tillgänglighet | 99,0 % / månad | [Antagande: dashboard från CloudFrame/övervakningsverktyg] |
 | Första svar | 95 % inom 10 s | Lumeon-logg |
 | Deflection rate | ≥ 40 % (go-live) | Ärendestatistik |
 | P1/P2-eskalering | 100 % till människa | Incident-logg |
@@ -89,12 +89,12 @@
 
 ## Slide 6 – Leverantörsberoenden
 
-**Rubrik:** CloudFrame Nordic & Lumeon – status och hantering
+**Rubrik:** Lumeon API & CloudFrame Nordic – status och hantering
 
 | Leverantör | Funktion | SLA | Risk | Fallback |
 |------------|---------|-----|------|---------|
-| CloudFrame Nordic | AI-motor | P1: 30 min | Kritisk | Manuell first line |
-| Lumeon | Ärendehantering | P1: 30 min | Hög | Manuell tickethantering |
+| Lumeon API | LLM-leverantör | P1: 30 min | Kritisk | Manuell first line |
+| CloudFrame Nordic | Drift och hosting | P1: 30 min | Kritisk | Manuell first line |
 
 **Speaker notes:**
 > "Båda leverantörer har bekräftat produktionsredo status [datum]. SLA-kraven är dokumenterade. Vi är inte naiva – vi har planerat för att båda kan gå ner, var för sig eller samtidigt."

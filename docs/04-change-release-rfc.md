@@ -22,10 +22,10 @@ Pilottester med [antal] medarbetare har genomförts. Resultaten visar att tjäns
 
 Denna RFC täcker:
 - Produktionssättning av NordIQ i Teams, webbportal och mejl-integration
-- Aktivering av Lumeon-integration i produktion
-- Aktivering av CloudFrame Nordic AI-motor i produktion
+- Aktivering av Lumeon API (LLM) i produktion
+- Aktivering av CloudFrame Nordic drift/hosting i produktion
 - Publisering av kunskapsbas (initialt: [antal] artiklar)
-- Kommunikation till alla ~800 medarbetare på NordTech AB
+- Kommunikation till alla ~450 medarbetare på NordTech AB
 
 ---
 
@@ -42,7 +42,7 @@ Denna RFC täcker:
 
 | Grupp | Antal | Påverkan |
 |-------|-------|----------|
-| Alla medarbetare | ~800 | Ny kanal för IT-support |
+| Alla medarbetare | ~450 | Ny kanal för IT-support |
 | First line support | ~5 pers | Förändrad arbetsbelastning; färre grundfrågor |
 | Second line / Dev | ~10 pers | Tar emot strukturerade eskaleringar från NordIQ |
 | Anna Berg | 1 | Nytt driftansvar |
@@ -85,7 +85,7 @@ Denna RFC täcker:
 |-----------|-------|----------|-------|
 | Pre-announcement till chefer | Mejl från Martin Lindqvist | Martin Lindqvist | [datum - 7 dagar] |
 | All-staff-kommunikation | Teams + intranät | Anna Berg | [datum - 3 dagar] |
-| Instruktionsvideo / FAQ | SharePoint | Karl Eek | [datum - 3 dagar] |
+| Instruktionsvideo / FAQ | [Antagande: SharePoint / intranät] | Karl Eek | [datum - 3 dagar] |
 | Go-live-bekräftelse | Teams-meddelande | Anna Berg | Go-live-dagen |
 | Feedback-enkät (vecka 2) | Teams / e-post | Anna Berg | [datum + 14 dagar] |
 
