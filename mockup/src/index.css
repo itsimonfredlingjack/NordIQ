@@ -1,0 +1,116 @@
+@import "tailwindcss";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+
+/* ============================================================
+   NordIQ — Dark, calm, single-purpose chat surface.
+   No light mode. One signature accent. Lots of breathing room.
+   ============================================================ */
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Deep midnight base — warm undertone, never pure black */
+  --color-bg:        oklch(15% 0.012 250);
+  --color-bg-2:      oklch(17% 0.014 252);
+  --color-surface:   oklch(20% 0.014 252);
+  --color-surface-2: oklch(24% 0.014 252);
+  --color-border:    oklch(28% 0.012 252);
+  --color-border-2:  oklch(38% 0.012 252);
+
+  --color-fg:        oklch(96% 0.005 250);
+  --color-fg-muted:  oklch(70% 0.012 250);
+  --color-fg-subtle: oklch(52% 0.012 250);
+
+  /* Signature accent — sage/teal, calm and Nordic, not default-purple */
+  --color-accent:        oklch(75% 0.11 175);
+  --color-accent-soft:   oklch(28% 0.045 175);
+  --color-accent-border: oklch(40% 0.06 175);
+
+  /* Quiet status — used sparingly, never as filled banners */
+  --color-warm:    oklch(78% 0.10 70);   /* warm sand for ticket markers */
+  --color-alert:   oklch(72% 0.13 25);   /* muted brick for escalation */
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+@layer base {
+  html, body { height: 100%; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-fg);
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-border-2); }
+
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+}
+
+/* ============================================================
+   Atmosphere — soft radial breathing behind everything.
+   Subtle, never distracting. The "presence" of NordIQ.
+   ============================================================ */
+@layer utilities {
+  .ambient {
+    position: relative;
+    isolation: isolate;
+  }
+  .ambient::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60% 50% at 70% 0%,    oklch(35% 0.08 175 / 0.28), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%,   oklch(30% 0.06 270 / 0.22), transparent 70%),
+      radial-gradient(80% 60% at 50% 120%,  oklch(28% 0.04 250 / 0.30), transparent 60%);
+    pointer-events: none;
+  }
+
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg)];
+  }
+
+  .pulse-orb {
+    animation: pulse-orb 4s ease-in-out infinite;
+  }
+  @keyframes pulse-orb {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.04); opacity: 1; }
+  }
+
+  .breathe {
+    animation: breathe 3.2s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+  }
+
+  /* No noisy text. Section eyebrows are this style only. */
+  .eyebrow {
+    @apply text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-fg-subtle)];
+  }
+}

@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.vite
+.cache
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.idea
+.vscode
+*.log
+*.swp
