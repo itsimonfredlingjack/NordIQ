@@ -1,0 +1,35 @@
+flowchart TD
+    A[🤖 NordIQ\nAI-agent] -->|P1/P2 detekterad\nautomatiskt < 60 s| B[📞 On-call\nFirst Responder]
+
+    B -->|Tekniskt problem\nplattform/integration| C[⚙️ Karl Eek\nDev Lead]
+    B -->|Driftproblem\nSLO-avvikelse| D[🛡️ Anna Berg\nIT Ops Lead]
+
+    C -->|CloudFrame-problem| E[☁️ CloudFrame Nordic\nLeverantörssupport\nP1: svar < 30 min]
+    C -->|Lumeon-problem| F[🔗 Lumeon API\nLeverantörssupport\nP1: svar < 30 min]
+    C -->|Intern teknisk lösning| G[✅ Löst]
+
+    D -->|P1 olöst efter 1 h| H[👔 Martin Lindqvist\nCIO / Sponsor]
+    D -->|HR-påverkan| I[👥 Lina Nordin\nHead of HR]
+    D -->|Intern driftåtgärd| G
+
+    E --> G
+    F --> G
+    H -->|Strategiskt beslut\nt.ex. rollback| J[🔄 Rollback aktiveras\nAnna Berg beslutar]
+    J --> K[📢 Kommunikation\ntill medarbetare]
+
+    G --> L[📝 Post-Incident Review\n< 48 h]
+    L --> M[📚 Uppdatera\nRisk-register & Kunskapsbas]
+
+    style A fill:#fff3e0,stroke:#FF9800
+    style B fill:#e3f2fd,stroke:#2196F3
+    style C fill:#e8f4fd,stroke:#2196F3
+    style D fill:#e8f4fd,stroke:#2196F3
+    style E fill:#fce4ec,stroke:#E91E63
+    style F fill:#fce4ec,stroke:#E91E63
+    style G fill:#e8f5e9,stroke:#4CAF50
+    style H fill:#f3e5f5,stroke:#9C27B0
+    style I fill:#f3e5f5,stroke:#9C27B0
+    style J fill:#ffebee,stroke:#F44336
+    style K fill:#fff3e0,stroke:#FF9800
+    style L fill:#e8f5e9,stroke:#4CAF50
+    style M fill:#e8f5e9,stroke:#4CAF50
