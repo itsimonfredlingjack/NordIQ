@@ -38,7 +38,7 @@ Inline cues are deliberately quiet:
 No dashboards, no SLO views, no model/policy admin, no risk register. Those live elsewhere — this is the surface a regular employee sees.
 
 ## Design direction
-See `docs/spec.md` for the full design rationale (note: spec was written for an earlier multi-view version; some sections describe screens that no longer exist in this slim version).
+See `docs/spec.md` for the current chat-only mockup rationale and its limits as demo evidence.
 
 ## Folder structure
 

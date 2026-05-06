@@ -1,4 +1,4 @@
-# NordIQ – Go-Live Readiness Package
+# NordIQ - Go-Live Readiness Package
 
 > **Skoluppgift | ITIL | CAB-underlag**  
 > Kurs: IT-tjänstehantering | Grupp: [Gruppnamn]
@@ -7,27 +7,40 @@
 
 ## Vad är det här repot?
 
-Det här repot innehåller ett **Go-Live Readiness Package** för tjänsten **NordIQ** – en AI-stödd intern service desk hos det fiktiva bolaget **NordTech AB**.
+Det här repot innehåller ett **Go-Live Readiness Package** för tjänsten **NordIQ** - en AI-stödd intern service desk hos det fiktiva bolaget **NordTech AB**.
 
-Paketet är framtaget som beslutsunderlag inför ett CAB-möte (Change Advisory Board) och riktar sig primärt till CIO Martin Lindqvist och övriga beslutsfattare.
+Paketet är tänkt som beslutsunderlag inför ett CAB-möte (Change Advisory Board) och riktar sig primärt till CIO Martin Lindqvist och övriga beslutsfattare. Dokumenten är arbetsutkast: värden som inte uttryckligen kommer från skolmaterialet ska behandlas som antaganden eller go/no-go-kriterier tills de verifieras.
 
 ---
 
 ## Case: NordTech AB & NordIQ
 
-**NordTech AB** är ett medelstort teknikföretag med ca 800 medarbetare och en centraliserad IT-organisation. Företaget vill minska trycket på first-line support och förbättra tillgängligheten för medarbetare utanför kontorstid.
+**NordTech AB** är ett medelstort svenskt IT-konsultbolag med cirka 450 medarbetare, Göteborg som huvudkontor och kontor även i Stockholm och Malmö. Den interna IT-organisationen är cost-center IT med cirka 25 personer, ingen formaliserad CAB och inga dokumenterade SLO:er.
 
-**NordIQ** är en intern AI-stödd service desk som integreras med Teams, mejl och en webbportal. Den hanterar vanliga IT-ärenden dygnet runt och eskalerar strukturerat till rätt supportnivå när det behövs.
+**NordIQ** är den tjänst som ska sjösättas: en AI-stödd intern service desk som ska triagera och svara på återkommande first-line-ärenden, samt eskalera ärenden som behöver mänsklig hantering via befintligt ärendehanteringssystem.
+
+Källmaterialets basdata:
+
+| Område | Uppgift |
+|--------|---------|
+| Medarbetare | cirka 450 |
+| First-line-belastning | cirka 70 ärenden per dag |
+| First-line-bemanning | 4 personer |
+| Genomsnittlig resolution idag | 2,5 dagar |
+| Återkommande/FAQ-klassade ärenden | cirka 40 % |
+| NordIQ-målbild | 40-60 % first-line deflection |
+| Tillgänglighetsidé | 24/7, utan skift och helgköer |
+| Leverantörer | CloudFrame Nordic = hostingplattform för AI Agent Platform; Lumeon API = LLM API för agentlagret |
 
 ### Nyckelintressenter
 
 | Namn | Roll |
 |------|------|
-| Martin Lindqvist | CIO – sponsrar go-live-beslutet |
-| Anna Berg | IT Ops Lead – driftansvarig post go-live |
-| Karl Eek | Dev Lead – ansvarig för plattform och integration |
-| Erik Holm | CFO – godkänner kostnadsbild och ROI |
-| Lina Nordin | Head of HR – påverkas av onboarding-flöden |
+| Martin Lindqvist | CIO - beställare och go-live-beslutsägare |
+| Anna Berg | IT Ops Lead - tar över driftansvar post go-live |
+| Karl Eek | Internal Dev Lead - ansvarig för AI Agent Platform |
+| Erik Holm | CFO - äger leverantörsavtal och kostnadsfrågor |
+| Lina Nordin | Head of HR - tung användare av first-line support vid onboarding |
 
 ---
 
@@ -42,12 +55,12 @@ Paketet ska besvara tre frågor inför CAB:
 
 ## Snabb arbetsgång
 
-```
-1. Service Snapshot     → Vad är tjänsten? Vem använder den?
-2. SLO:er               → Hur mäter vi att den fungerar?
-3. Operational Readiness → Hur driftsätts och hanteras den?
-4. Change & Release     → RFC och go-live-plan
-5. Reflection           → Vad lärde vi oss?
+```text
+1. Service Snapshot      -> Vad är tjänsten? Vem använder den?
+2. SLO:er                -> Hur mäter vi att den fungerar?
+3. Operational Readiness -> Hur driftsätts och hanteras den?
+4. Change & Release      -> RFC och go-live-plan
+5. Reflection            -> Vad lärde vi oss?
 ```
 
 ---
@@ -96,9 +109,8 @@ Paketet ska besvara tre frågor inför CAB:
 
 | Mapp | Beskrivning |
 |------|-------------|
-| [mockup/](mockup/) | Klickbar single-screen-mockup av medarbetar-yta för NordIQ — Vite + React + TS. Tre auto-spelade scenarier: lösenordsåterställning, konsult-onboarding, NordTrack-incident. Kör med `cd mockup && npm install && npm run dev`. |
+| [mockup/](mockup/) | Klickbar single-screen-mockup av medarbetar-yta för NordIQ - Vite + React + TS. Tre auto-spelade scenarier: lösenordsåterställning, konsult-onboarding, NordTrack-incident. Kör med `cd mockup && npm install && npm run dev`. |
 
 ---
 
-> **Antagande:** Alla kostnadsuppgifter, SLA-värden och tidpunkter i detta repo är uppskattningar baserade på rimliga antaganden för en tjänst av NordIQs typ. Gruppen uppmanas att justera dessa värden baserat på tillgänglig information.
-
+> **Antagande:** Tekniska detaljer som inte uttryckligen stöds av skolmaterialet, exempelvis kanalval, kunskapsbasverktyg, övervakning, testupplägg och exakta SLO-trösklar, är arbetsantaganden. De ska verifieras innan de används som beslutsunderlag i CAB.

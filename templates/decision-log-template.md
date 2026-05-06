@@ -1,7 +1,7 @@
-# Beslutslogg – [Projekt/Tjänst]
+# Beslutslogg - [Projekt/Tjänst]
 
 > **Mall för:** Dokumentera viktiga beslut under projektet  
-> **Fyll i löpande – ett rad per beslut**
+> **Fyll i löpande - en rad per beslut**
 
 ---
 
@@ -25,13 +25,14 @@
 
 ---
 
-## Exempelbeslut för NordIQ
+## Illustrativa exempelrader
+
+> Exemplet nedan är malltext, inte historik för NordIQ och inte bevis på att beslut är fattade.
 
 | ID | Datum | Beslut | Alternativ övervägda | Beslutsfattare | Motivering | Status |
 |----|-------|--------|----------------------|----------------|------------|--------|
-| B-01 | [datum] | CloudFrame Nordic valdes som AI-leverantör | Azure OpenAI direkt, intern lösning | Karl Eek + Martin Lindqvist | Bäst stöd för svenska NLP; leverantörs-SLA passade kraven | Aktivt |
-| B-02 | [datum] | Lumeon valdes för ärendehantering | ServiceNow, Jira Service Management | Anna Berg + Karl Eek | Befintlig integration i NordTech; lägre implementeringskostnad | Aktivt |
-| B-03 | [datum] | Go-live med villkor (inte fullständigt godkänt) | Full go-live, uppskjuten go-live | CAB | Risker identifierade men hanterbara; villkor ger kontrollerat go-live | Aktivt |
+| B-EX-01 | [datum] | [Exempel: bekräfta vilka kanaler som ingår i go-live-scope] | [Exempel: Teams, mejl, webbportal] | [Namn/Roll] | [Kort motivering] | Exempel |
+| B-EX-02 | [datum] | [Exempel: acceptera villkorat go-live-beslut] | [Exempel: full go-live, begränsad rollout, uppskjutet go-live] | [CAB] | [Kort motivering] | Exempel |
 
 ---
 

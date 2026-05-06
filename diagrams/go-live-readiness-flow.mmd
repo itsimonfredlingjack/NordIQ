@@ -1,23 +1,23 @@
 flowchart LR
-    A[📋 Service Snapshot\n01-service-snapshot.md\n\nVad är tjänsten?\nVem använder den?\nUtility & Warranty] --> B
+    A[Service Snapshot\n01-service-snapshot.md\n\nVad är tjänsten?\nVem påverkas?\nUtility & Warranty] --> B
 
-    B[📊 SLO:er & Mätning\n02-service-levels-slo.md\n\nDefinierar framgångsmått\nGo/No-Go-kriterier\nBaseline-mätning] --> C
+    B[SLO:er & mätning\n02-service-levels-slo.md\n\nMål, baselinebehov\nGo/No-Go-kriterier] --> C
 
-    C[🛡️ Operational Readiness\n03-operational-readiness.md\n\nDriftmodell klar\nIncident Playbook\nHandover till Anna Berg] --> D
+    C[Operational Readiness\n03-operational-readiness.md\n\nDriftmodell föreslagen\nIncident Playbook\nHandover-villkor] --> D
 
-    D[📝 Change & Release RFC\n04-change-release-rfc.md\n\nRFC-NordIQ-001\nTestbevis\nRollback-plan testad] --> E
+    D[Change & Release RFC\n04-change-release-rfc.md\n\nRFC-NordIQ-001\nVerifieringskrav\nRollback-villkor] --> E
 
-    E{⚖️ CAB-beslut\n\nAlla go/no-go\nkriterier uppfyllda?}
+    E{CAB-beslut\n\nÄr villkoren verifierade?}
 
-    E -->|✅ Ja – alla villkor OK| F[🚀 GO-LIVE\nNordIQ produktionssatt]
-    E -->|⚠️ Villkor kvarstår| G[🔄 Begränsad rollout\nPilotgrupp 50 pers\nNytt datum +14 dagar]
-    E -->|❌ Kritiska blockerare| H[🛑 Go-live uppskjuts\nRoot cause åtgärdas\nNy RFC-cykel]
+    E -->|Ja - villkor stängda| F[GO-LIVE\nNordIQ produktionssätts]
+    E -->|Villkor kvarstår| G[Begränsad rollout\neller senarelagt go-live\nny verifiering]
+    E -->|Kritiska blockerare| H[Go-live skjuts upp\nroot cause åtgärdas\nny RFC-cykel]
 
     G --> E
     H --> A
 
-    F --> I[🩺 Hypercare\nVecka 1–4\nUtökad bemanning\nDaglig SLO-granskning]
-    I --> J[📈 Business as Usual\nMånadsvis CI-möte\nSLO-uppföljning\nLeverantörsstatus]
+    F --> I[Hypercare\nförstärkt uppföljning\nSLO-granskning]
+    I --> J[Business as Usual\nCI-möte\nSLO-uppföljning\nleverantörsconstraints]
 
     style A fill:#e3f2fd,stroke:#2196F3
     style B fill:#e3f2fd,stroke:#2196F3
@@ -25,7 +25,7 @@ flowchart LR
     style D fill:#e3f2fd,stroke:#2196F3
     style E fill:#fff9c4,stroke:#F9A825
     style F fill:#e8f5e9,stroke:#4CAF50
-    style G fill:#fff3e0,stroke:#FF9800
+    style G fill:#fff3e0,stroke:#F97316
     style H fill:#ffebee,stroke:#F44336
     style I fill:#f3e5f5,stroke:#9C27B0
     style J fill:#e8f5e9,stroke:#4CAF50

@@ -1,24 +1,26 @@
-# Executive Summary – NordIQ Go-Live
+# Executive Summary - NordIQ Go-Live
 
 > **Dokumenttyp:** Beslutsunderlag  
 > **Till:** CAB, CIO Martin Lindqvist  
-> **Datum:** [YYYY-MM-DD]  
+> **Datum:** Ej satt  
 > **Version:** 1.0  
-> **Status:** Utkast / Klar för CAB
+> **Status:** Utkast - ej CAB-klar
 
 ---
 
 ## 1. Beslut som begärs
 
-CAB ombeds att **godkänna go-live av NordIQ** med de villkor som anges i avsnitt 5.
+CAB ombeds granska om NordIQ kan godkännas för go-live **när** villkoren i avsnitt 5 är verifierade. Detta dokument är ett utkast till beslutsunderlag, inte bevis på att villkoren redan är uppfyllda.
 
 ---
 
 ## 2. Rekommendation
 
-> **Go-live med villkor**
+> **Preliminär rekommendation: Go-live med villkor**
 
-NordIQ har uppnått de tekniska och operationella förutsättningarna för go-live. Kvarstående risker är identifierade, åtgärdsplaner finns och en rollback-plan är testad. Rekommendationen är att godkänna go-live under förutsättning att alla go/no-go-kriterier är uppfyllda senast [datum].
+NordIQ adresserar ett tydligt verksamhetsbehov: first-line service desk hanterar cirka 70 ärenden per dag över 4 personer, med 2,5 dagars genomsnittlig resolution och cirka 40 % återkommande/FAQ-klassade ärenden. En AI-stödd intern service desk kan ge värde om den mäts, styrs och kan backas ur kontrollerat.
+
+Rekommendationen är därför inte ett färdigt go-live-godkännande. Den är att fortsätta mot CAB med villkorade go/no-go-kriterier, tydliga SLO:er, dokumenterad rollback och verifierade leverantörsberoenden.
 
 ---
 
@@ -26,50 +28,51 @@ NordIQ har uppnått de tekniska och operationella förutsättningarna för go-li
 
 | Nytta | Beskrivning |
 |-------|-------------|
-| Tillgänglighet | Medarbetare får support 24/7, även utanför kontorstid |
-| Avlastning first line | Antagande: 40–60 % av ärenden deflekteras direkt |
-| Spårbarhet | Alla ärenden loggas och eskaleras strukturerat |
-| Skalbarhet | Kapaciteten kan ökas utan proportionell personalkostnad |
-| Snabbare onboarding | Lina Nordin: nya medarbetare får direktsvar på vanliga frågor |
+| Tillgänglighet | Målbilden är support 24/7 för cirka 450 medarbetare, särskilt utanför kontorstid och måndag morgon-köer. |
+| Avlastning first line | Case-data visar att cirka 40 % av ärendena är återkommande/FAQ-klassade; NordIQ har målbilden 40-60 % first-line deflection. |
+| Spårbar eskalering | Ärenden som inte kan lösas direkt ska eskaleras strukturerat till människa via befintligt ärendehanteringssystem. |
+| Bättre förbättringsdata | Återkommande frågor, felklassificeringar och kunskapsluckor blir input till Continual Improvement. |
+| Onboardingstöd | Lina Nordins område påverkas eftersom onboarding driver många repetitiva supportfrågor. |
 
 ---
 
 ## 4. Risker (sammanfattning)
 
-| Risk | Sannolikhet | Påverkan | Åtgärd |
-|------|-------------|----------|--------|
-| Lumeon API nere | Medel | Hög | Fallback till manuell first line |
-| AI ger felaktigt svar | Medel | Medel | Human-in-the-loop för P1/P2 |
-| P1 fastnar hos agenten | Låg | Kritisk | Automatisk eskalering efter 60 s |
-| Tokenkostnad ökar | Medel | Medel | Budgetlarm och review Q1 |
+| Risk | Sannolikhet | Påverkan | Föreslagen hantering |
+|------|-------------|----------|----------------------|
+| CloudFrame Nordic nere | Låg/Medel | Kritisk | CloudFrame är hostingplattform för AI Agent Platform; fallback till manuell first line krävs. |
+| Lumeon API nere eller instabilt | Medel | Hög | Lumeon är LLM API för agentlagret; agentens svarsförmåga kan behöva pausas. |
+| AI ger felaktigt svar | Medel | Medel/Hög | Kunskapsbasstyrning, mänsklig eskalering och förbättringsregister krävs. |
+| P1/P2 fastnar hos agenten | Låg | Kritisk | P1/P2 ska alltid eskaleras till människa; detta måste verifieras före go-live. |
+| Tokenkostnad ökar | Medel | Medel | LLM-användning via Lumeon API behöver följas upp som kostnadsrisk. |
 
-*Se fullständigt riskregister: [risk-register.md](risk-register.md)*
+*Se fullständigt riskregister: [risk-register.md](risk-register.md).*
 
 ---
 
 ## 5. Villkor för go-live
 
-- [ ] Alla SLO-baslinjer mäts och är stabila under minst 5 dagar i staging
-- [ ] Rollback-plan är testad och dokumenterad
-- [ ] Anna Berg har signerat driftövertagande
-- [ ] Karl Eek har bekräftat integrationsstatus CloudFrame och Lumeon
-- [ ] Kommunikation till medarbetare är skickad senast [datum]
-- [ ] On-call-schema är satt för hypercare-perioden (vecka 1–4)
+- [ ] Baseline för SLO:er är mätt i test-/pilotmiljö innan CAB-beslut.
+- [ ] Rollback-plan är dokumenterad och verifierad innan produktionssättning.
+- [ ] Anna Berg har granskat och accepterat driftövertagande som go-live-förutsättning.
+- [ ] CloudFrame Nordic och Lumeon API har granskats som leverantörsberoenden, inklusive vad deras SLA:er faktiskt stödjer.
+- [ ] Kommunikationsplan till medarbetare är färdigställd innan go-live.
+- [ ] On-call- och eskaleringsvägar för hypercare är beslutade innan go-live.
 
 ---
 
 ## 6. Kvarstående risk
 
-Även efter go-live finns en residualrisk kring Lumeon API:s stabilitet och kunskapsbasens täckningsgrad. Dessa risker hanteras inom ramen för Continual Improvement-processen och granskas månadsvis av Anna Berg.
+Även efter ett villkorat go-live-beslut finns residualrisk kring AI-svarskvalitet, Lumeon API:s LLM-beroende, CloudFrame som hostingberoende och kunskapsbasens kvalitet. Dessa risker ska hanteras genom SLO-uppföljning, incident-/problemhantering och Continual Improvement.
 
 ---
 
 ## 7. Nästa steg
 
-| Steg | Ansvarig | Datum |
-|------|----------|-------|
-| Slutlig go/no-go-kontroll | Anna Berg | [datum] |
-| CAB-möte | Martin Lindqvist | [datum] |
-| Go-live | Karl Eek | [datum] |
-| Hypercare-avslut och review | Anna Berg | [datum + 30 dagar] |
-| Första CI-genomgång | Anna Berg | [datum + 60 dagar] |
+| Steg | Ansvarig | Status |
+|------|----------|--------|
+| Slutlig go/no-go-kontroll | Anna Berg | Planerad verifiering |
+| CAB-möte | Martin Lindqvist | Ej schemalagt i detta underlag |
+| Go-live-beslut | CAB / Martin Lindqvist | Ej fattat |
+| Hypercare-start | Anna Berg | Beroende av CAB-beslut |
+| Första CI-genomgång | Anna Berg | Planerad efter go-live |

@@ -59,7 +59,7 @@ Rollback aktiveras om ett eller flera av följande inträffar:
 ## Verifiering efter rollback
 
 - [ ] Gammal lösning/process fungerar korrekt
-- [ ] Inga ärenden är i limbo (kontrollera ticket-system)
+- [ ] Inga ärenden är i limbo (kontrollera befintligt ärendehanteringssystem)
 - [ ] Kommunikation skickad till alla berörda
 - [ ] Root cause-analys startad
 - [ ] Sponsor/CIO informerad

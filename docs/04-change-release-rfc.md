@@ -1,158 +1,171 @@
-# Change & Release – RFC för Go-Live av NordIQ
+# Change & Release - RFC för Go-Live av NordIQ
 
 > **RFC-ID:** RFC-NordIQ-001  
 > **Dokumenttyp:** Request for Change  
 > **Initierad av:** Karl Eek  
 > **Driftansvarig:** Anna Berg  
 > **Godkänns av:** CAB / Martin Lindqvist  
-> **Datum:** [YYYY-MM-DD]  
-> **Version:** 1.0
+> **Datum:** Ej satt  
+> **Version:** 1.0  
+> **Status:** Utkast inför CAB - ej genomförd change
 
 ---
 
 ## 1. Bakgrund
 
-NordTech AB har under [tidsperiod] byggt och testat NordIQ – en AI-stödd intern service desk. Syftet är att avlasta first-line support, förbättra tillgängligheten för medarbetare och skapa spårbar ärendehantering dygnet runt.
+NordTech AB planerar NordIQ som en AI-stödd intern service desk. Caset anger att first-line service desk är överbelastad med cirka 70 ärenden per dag över 4 personer, 2,5 dagars genomsnittlig resolution och cirka 40 % återkommande/FAQ-klassade ärenden.
 
-Pilottester med [antal] medarbetare har genomförts. Resultaten visar att tjänsten är tekniskt stabil och att deflection rate under piloten uppnådde [X] %. Kvarstående risker är identifierade och åtgärdsplaner finns.
+Denna RFC beskriver vilka villkor som behöver vara uppfyllda innan NordIQ kan gå live. Den dokumenterar inte att pilot, test, rollback eller leverantörsbekräftelser redan är genomförda.
 
 ---
 
 ## 2. Scope
 
-Denna RFC täcker:
-- Produktionssättning av NordIQ i Teams, webbportal och mejl-integration
-- Aktivering av Lumeon-integration i produktion
-- Aktivering av CloudFrame Nordic AI-motor i produktion
-- Publisering av kunskapsbas (initialt: [antal] artiklar)
-- Kommunikation till alla ~800 medarbetare på NordTech AB
+Denna RFC täcker föreslagen produktionssättning av:
+
+- NordIQ som intern service desk-ingång för cirka 450 medarbetare.
+- De kanaler som beslutas för go-live, exempelvis Teams, mejl eller webbportal.
+- CloudFrame Nordic som hostingplattform för AI Agent Platform.
+- Lumeon API som LLM API för agentlagret.
+- Befintligt ärendehanteringssystem för ärenden som behöver mänsklig hantering.
+- Initial kunskapsbas för de ärendetyper som ingår i go-live-scope.
+- Kommunikation till NordTechs medarbetare innan go-live.
 
 ---
 
 ## 3. Out of Scope
 
-- Ändringar i befintliga second-line-processer (utöver eskaleringsflöde)
-- Integration med externa system (framtida fas)
-- HR-systemintegration utöver onboarding-FAQ
-- Automatisk problemhantering (aktiveras i fas 2)
+- Byte av leverantörer eller omförhandling av avtal; studentteamet har inget budget- eller upphandlingsmandat.
+- Nyanställning eller bemanningsförändring.
+- Full automatisering av problem management.
+- Externa kund-SLA:er eller kommersiella kundavtal.
+- Tekniska integrationsdetaljer som inte stöds av skolmaterialet.
 
 ---
 
-## 4. Påverkade Användare
+## 4. Påverkade användare
 
 | Grupp | Antal | Påverkan |
 |-------|-------|----------|
-| Alla medarbetare | ~800 | Ny kanal för IT-support |
-| First line support | ~5 pers | Förändrad arbetsbelastning; färre grundfrågor |
-| Second line / Dev | ~10 pers | Tar emot strukturerade eskaleringar från NordIQ |
-| Anna Berg | 1 | Nytt driftansvar |
-| Karl Eek | 1 | Plattformsansvar kvarstår post go-live |
+| Alla medarbetare | cirka 450 | Ny eller tydligare intern supportväg. |
+| First line support | 4 personer | Mindre repetitivt inflöde om deflection fungerar; förändrad roll vid eskalering. |
+| Second line / specialistgrupper | Ej specificerat | Tar emot strukturerade eskaleringar från NordIQ. |
+| Anna Berg | 1 | Driftmottagare post go-live. |
+| Karl Eek | 1 | Plattform och agentlager behöver stödja driftkraven. |
+| Erik Holm | 1 | Äger leverantörsavtal och kostnadsfrågor. |
+| Lina Nordin | 1 | Påverkas särskilt vid onboardingärenden. |
 
 ---
 
 ## 5. Risker
 
-| Risk | Sannolikhet | Påverkan | Åtgärd |
-|------|-------------|----------|--------|
-| Lumeon API instabilt i produktion | Medel | Hög | Fallback-procedur till manuell first line aktiveras |
-| Låg adoption bland medarbetare | Medel | Medel | Kommunikationskampanj + ambassadörsprogram |
-| AI-svar med fel information | Medel | Medel | Human-in-the-loop för alla P1/P2; kvalitetsgranskning vecka 1–2 |
-| Hög tokenkostnad | Låg | Medel | Kostnadslarm satt; granskas vecka 2 |
+| Risk | Sannolikhet | Påverkan | Föreslagen åtgärd |
+|------|-------------|----------|-------------------|
+| CloudFrame-hosting instabil | Låg/Medel | Kritisk | Fallback till manuell first line och eskalering enligt leverantörsavtal. |
+| Lumeon API / LLM instabilt | Medel | Hög | Pausa AI-svarsförmåga och använd manuell first line. |
+| Låg adoption bland medarbetare | Medel | Medel | Kommunikationsplan och enkel väg till människa. |
+| AI-svar med fel information | Medel | Medel/Hög | Kunskapsbasägarskap, mänsklig eskalering och CI-register. |
+| Hög tokenkostnad | Medel | Medel | Planerad uppföljning av Lumeon API-användning och kostnad. |
 
-*Fullständigt riskregister: [risk-register.md](risk-register.md)*
+*Fullständigt riskregister: [risk-register.md](risk-register.md).*
 
 ---
 
-## 6. Testbevis
+## 6. Verifiering före CAB
 
-| Test | Resultat | Utfört av | Datum |
-|------|----------|-----------|-------|
-| Funktionstest – Teams-kanal | ✅ Godkänt | Karl Eek | [datum] |
-| Funktionstest – webbportal | ✅ Godkänt | Karl Eek | [datum] |
-| Integrationstest – Lumeon API | ✅ Godkänt | Karl Eek | [datum] |
-| Lastest (100 simultana användare) | ✅ Godkänt | [testansvarig] | [datum] |
-| Säkerhetstest (pen test) | ⚠️ Godkänt med anmärkning | [extern] | [datum] |
-| Rollback-test | ✅ Godkänt | Karl Eek + Anna Berg | [datum] |
-| Pilot (50 medarbetare, 5 dagar) | ✅ Deflection [X] %, SLO uppnådda | Anna Berg | [datum] |
+| Verifiering | Syfte | Ansvarig | Status |
+|-------------|-------|----------|--------|
+| Funktionstest av valda kanaler | Visa att medarbetaren kan nå NordIQ. | Karl Eek | Ej verifierat |
+| Integration mot befintligt ärendehanteringssystem | Visa att eskaleringar kan registreras och följas upp. | Karl Eek / Anna Berg | Ej verifierat |
+| Lumeon API som LLM-beroende | Visa att agentlagret kan anropa LLM API och hantera fel. | Karl Eek | Ej verifierat |
+| CloudFrame-hosting | Visa att AI Agent Platform är nåbar och övervakningsbar. | Karl Eek | Ej verifierat |
+| Last-/kapacitetskontroll | Visa att cirka 70 ärenden/dag och toppar kan hanteras. | Karl Eek | Planerad verifiering |
+| Säkerhetsgranskning | Kontrollera att P1/P2, behörighet och personuppgifter inte hanteras fel. | Anna Berg / Karl Eek | Krävs före CAB |
+| Rollback-genomgång | Visa att NordIQ kan pausas och manuell first line återupptas. | Anna Berg | Krävs före CAB |
+| Pilot eller begränsad rollout | Mäta baseline för deflection, svarstid och eskaleringskvalitet. | Anna Berg | Planerad verifiering |
 
-> **Antagande:** Säkerhetstestets anmärkning gäller [beskriv kort]. Åtgärdas senast [datum] och är inte ett go-live-blockerande fynd.
+> Inga testresultat eller pilotvärden är etablerade i detta dokument. De ska fyllas i först när faktisk evidens finns.
 
 ---
 
 ## 7. Kommunikationsplan
 
-| Aktivitet | Kanal | Ansvarig | Datum |
-|-----------|-------|----------|-------|
-| Pre-announcement till chefer | Mejl från Martin Lindqvist | Martin Lindqvist | [datum - 7 dagar] |
-| All-staff-kommunikation | Teams + intranät | Anna Berg | [datum - 3 dagar] |
-| Instruktionsvideo / FAQ | SharePoint | Karl Eek | [datum - 3 dagar] |
-| Go-live-bekräftelse | Teams-meddelande | Anna Berg | Go-live-dagen |
-| Feedback-enkät (vecka 2) | Teams / e-post | Anna Berg | [datum + 14 dagar] |
+| Aktivitet | Kanal | Ansvarig | Status |
+|-----------|-------|----------|--------|
+| Förhandsinformation till chefer | Mejl eller annat beslutat forum | Martin Lindqvist | Planerad |
+| Information till alla medarbetare | Teams, intranät eller annan beslutad kanal | Anna Berg | Planerad |
+| Kort användarguide / FAQ | Beslutat kunskapsbasverktyg | Karl Eek | Planerad |
+| Go-live-meddelande | Beslutad kanal | Anna Berg | Beroende av CAB-beslut |
+| Feedbackinsamling efter start | Teams, enkät eller ärendehanteringssystem | Anna Berg | Planerad |
 
 ---
 
 ## 8. Go/No-Go-kriterier
 
-Alla nedanstående kriterier måste vara uppfyllda för att go-live ska genomföras:
+Alla nedanstående kriterier måste vara uppfyllda eller uttryckligen riskaccepterade av CAB.
 
 | Kriterium | Godkänns av | Status |
 |-----------|-------------|--------|
-| Alla SLO-baslinjer stabila ≥ 5 dagar i staging | Karl Eek | ☐ |
-| Rollback-plan testad och dokumenterad | Anna Berg | ☐ |
-| CloudFrame och Lumeon bekräftar produktionsredo | Karl Eek | ☐ |
-| Driftövertagande signerat av Anna Berg | Anna Berg | ☐ |
-| Kommunikation till medarbetare skickad | Anna Berg | ☐ |
-| On-call-schema klart (4 veckor) | Anna Berg | ☐ |
-| CAB formellt godkänt denna RFC | Martin Lindqvist | ☐ |
+| SLO-baslinjer mätta i test-/pilotmiljö | Anna Berg | Ej verifierat |
+| Rollback-plan dokumenterad och genomgången | Anna Berg | Krävs före CAB |
+| CloudFrame- och Lumeon-constraints granskade mot faktisk SLA | Erik Holm / Anna Berg | Ej verifierat |
+| Driftövertagande accepterat av Anna Berg | Anna Berg | Ej verifierat |
+| Kommunikationsplan färdig | Anna Berg | Ej verifierat |
+| On-call-schema klart för hypercare | Anna Berg | Ej verifierat |
+| CAB formellt godkänner denna RFC | Martin Lindqvist / CAB | Ej beslutat |
 
 ---
 
 ## 9. Rollback-plan
 
 **Trigger för rollback:** Ett eller flera av följande inträffar under go-live eller hypercare:
-- P1-incident som inte kan lösas inom 2 timmar
-- Deflection rate sjunker under 20 % (tyder på fundamentalt fel)
-- Säkerhetsincident med dataexponering
+
+- P1-incident som inte kan begränsas inom beslutad tidsram.
+- P1/P2-ärenden fastnar hos agenten.
+- Deflection eller svarskvalitet indikerar fundamentalt fel.
+- Säkerhetsincident eller risk för felaktig hantering av personuppgifter.
+- CloudFrame eller Lumeon API har störning som gör NordIQ otillförlitligt.
 
 **Rollback-steg:**
 
-1. Anna Berg fattar beslut om rollback (konsulterar Karl Eek)
-2. NordIQ-botarna i Teams/webbportal inaktiveras (< 15 min)
-3. Medarbetare dirigeras tillbaka till manuell first line via Teams-meddelande
-4. Lumeon-integration pausas; tickets hanteras manuellt
-5. Root cause-analys startar omedelbart
-6. Karl Eek och Anna Berg rapporterar till Martin Lindqvist inom 1 timme
+1. Anna Berg fattar rollback-beslut och informerar Karl Eek.
+2. NordIQ-agentförmågan pausas eller döljs från valda kanaler.
+3. Medarbetare dirigeras tillbaka till manuell first line.
+4. Nya och pågående ärenden hanteras i befintligt ärendehanteringssystem.
+5. Lumeon API-anrop stoppas eller begränsas om LLM-lagret är orsak eller risk.
+6. Root cause-analys startar.
+7. Martin Lindqvist informeras enligt eskaleringsplan.
 
-**Estimerad tid för rollback:** 15–30 minuter  
-**Testad:** ☐ Ja / ☐ Nej
+**Estimerad tid för rollback:** Antagande: 15-30 minuter, måste verifieras.  
+**Testad:** Nej - krävs före CAB.
 
-*Se fullständig rollback-plan: [templates/rollback-plan-template.md](../templates/rollback-plan-template.md)*
+*Se fullständig rollback-planmall: [templates/rollback-plan-template.md](../templates/rollback-plan-template.md).*
 
 ---
 
 ## 10. Hypercare
 
-**Period:** Vecka 1–4 post go-live  
+**Period:** Antagande: vecka 1-4 post go-live  
 **Ansvarig:** Anna Berg
 
 | Aktivitet | Frekvens | Ansvarig |
 |-----------|----------|----------|
-| Daglig SLO-granskning | Dagligen | Anna Berg |
-| On-call bemanning (utökad) | 07–22 vardagar, 09–17 helger | Anna Berg + Karl Eek |
-| Veckogenomgång av incidenter och deflection | Veckovis | Anna Berg + Karl Eek |
-| Kommunikation till medarbetare (status) | Vid behov | Anna Berg |
+| SLO-granskning | Dagligen under första perioden | Anna Berg |
+| On-call bemanning | Enligt beslutad hypercare-plan | Anna Berg + Karl Eek |
+| Incident- och deflection-genomgång | Veckovis | Anna Berg + Karl Eek |
+| Kommunikation till medarbetare | Vid behov | Anna Berg |
 | Eskalering till Martin Lindqvist | Vid P1 eller trendavvikelse | Anna Berg |
 
-**Hypercare avslutas när:** Alla SLO:er är stabila under 2 på varandra följande veckor.
+**Hypercare avslutas när:** Antagande: SLO:er och eskaleringar är stabila under beslutad period.
 
 ---
 
 ## 11. CAB-beslut
 
-| Beslut | Datum | Beslutsfattare | Anteckningar |
-|--------|-------|----------------|--------------|
-| ☐ Godkänd – go-live | | | |
-| ☐ Godkänd med villkor | | | Villkor: |
-| ☐ Avslag – återkoppla | | | Orsak: |
+| Beslut | Status | Anteckningar |
+|--------|--------|--------------|
+| Go-live godkänns | Ej beslutat | |
+| Go-live godkänns med villkor | Rekommenderad beslutsform | Villkor ska listas av CAB. |
+| Go-live avslås eller skjuts upp | Ej beslutat | Orsak och ny verifieringsplan krävs. |
 
-> **Rekommendation:** Go-live med villkor. Alla go/no-go-kriterier ska vara uppfyllda och bekräftade skriftligt av Anna Berg och Karl Eek innan produktionssättning.
+> **Preliminär rekommendation:** Go-live med villkor, endast om go/no-go-kriterierna verifieras före produktionssättning.

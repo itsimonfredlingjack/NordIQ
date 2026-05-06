@@ -1,26 +1,26 @@
 flowchart TD
-    A[🤖 NordIQ\nAI-agent] -->|P1/P2 detekterad\nautomatiskt < 60 s| B[📞 On-call\nFirst Responder]
+    A[NordIQ\nAI-agent] -->|P1/P2 eller osäkert ärende| B[On-call\nfirst responder]
 
-    B -->|Tekniskt problem\nplattform/integration| C[⚙️ Karl Eek\nDev Lead]
-    B -->|Driftproblem\nSLO-avvikelse| D[🛡️ Anna Berg\nIT Ops Lead]
+    B -->|Tekniskt problem\nplattform/agentlager| C[Karl Eek\nInternal Dev Lead]
+    B -->|Driftproblem\nSLO-avvikelse| D[Anna Berg\nIT Ops Lead]
 
-    C -->|CloudFrame-problem| E[☁️ CloudFrame Nordic\nLeverantörssupport\nP1: svar < 30 min]
-    C -->|Lumeon-problem| F[🔗 Lumeon API\nLeverantörssupport\nP1: svar < 30 min]
-    C -->|Intern teknisk lösning| G[✅ Löst]
+    C -->|Hostingproblem| E[CloudFrame Nordic\nhostingplattform]
+    C -->|LLM/API-problem| F[Lumeon API\nLLM API för agentlagret]
+    C -->|Intern teknisk lösning| G[Löst]
 
-    D -->|P1 olöst efter 1 h| H[👔 Martin Lindqvist\nCIO / Sponsor]
-    D -->|HR-påverkan| I[👥 Lina Nordin\nHead of HR]
+    D -->|P1 olöst eller riskbeslut| H[Martin Lindqvist\nCIO / sponsor]
+    D -->|HR-påverkan| I[Lina Nordin\nHead of HR]
     D -->|Intern driftåtgärd| G
 
     E --> G
     F --> G
-    H -->|Strategiskt beslut\nt.ex. rollback| J[🔄 Rollback aktiveras\nAnna Berg beslutar]
-    J --> K[📢 Kommunikation\ntill medarbetare]
+    H -->|Strategiskt beslut\nt.ex. rollback| J[Rollback aktiveras\nAnna Berg beslutar]
+    J --> K[Kommunikation\ntill medarbetare]
 
-    G --> L[📝 Post-Incident Review\n< 48 h]
-    L --> M[📚 Uppdatera\nRisk-register & Kunskapsbas]
+    G --> L[Post-Incident Review\nefter P1/P2]
+    L --> M[Uppdatera\nriskregister och kunskapsbas]
 
-    style A fill:#fff3e0,stroke:#FF9800
+    style A fill:#fff3e0,stroke:#F97316
     style B fill:#e3f2fd,stroke:#2196F3
     style C fill:#e8f4fd,stroke:#2196F3
     style D fill:#e8f4fd,stroke:#2196F3
@@ -30,6 +30,6 @@ flowchart TD
     style H fill:#f3e5f5,stroke:#9C27B0
     style I fill:#f3e5f5,stroke:#9C27B0
     style J fill:#ffebee,stroke:#F44336
-    style K fill:#fff3e0,stroke:#FF9800
+    style K fill:#fff3e0,stroke:#F97316
     style L fill:#e8f5e9,stroke:#4CAF50
     style M fill:#e8f5e9,stroke:#4CAF50

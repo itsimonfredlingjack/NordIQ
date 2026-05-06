@@ -1,43 +1,45 @@
-# Intressentkarta – NordIQ
+# Intressentkarta - NordIQ
 
 > **Dokumenttyp:** Stakeholder Map  
 > **Ägare:** Anna Berg  
-> **Version:** 1.0
+> **Version:** 1.0  
+> **Status:** Utkast baserat på skolmaterialet
 
 ---
 
 ## Intressenttabell
 
 | Stakeholder | Roll | Vad de vill | Vad de oroar sig för | Hur vi hanterar det |
-|-------------|------|------------|----------------------|---------------------|
-| **Medarbetare** (~800) | Primär konsument av NordIQ | Snabb, korrekt hjälp utan att veta rätt supportväg; tillgänglighet utanför kontorstid | Att AI:n ger fel svar; att det är krångligare än att ringa direkt | Enkel onboarding-guide; tydlig feedbackknapp; mänsklig eskalering alltid möjlig |
-| **First line support** (~5) | Mottar eskalerade ärenden från NordIQ | Tydliga, kompletta tickets; minskad volym av triviala frågor | Att jobbet försvinner; att de får sämre ärenden med mer komplex info att hantera | Involvera first line i utformning av eskaleringstruktur; tydliggör att rollen förändras, inte försvinner |
-| **Second line / Dev** (~10) | Löser komplexa ärenden; tar emot eskaleringar | Välstrukturerade tickets med rätt info; förutsägbar belastning | Dåliga eskaleringar ökar merarbete; otydliga prioriteringar | SLO för eskaleringskvalitet; veckovis stickprov; feedback-loop till Karl Eek |
-| **Anna Berg** | IT Ops Lead; driftansvarig NordIQ | Tydlig driftmodell; fungerade SLO:er; support från ledning | Att hon inte har mandat eller resurser att åtgärda problem; att rollback krävs utan förvarning | Formell handover; tydliga ansvarsområden; direktlinje till Martin Lindqvist vid P1 |
-| **Karl Eek** | Dev Lead; plattformsansvarig | Tekniskt stabil plattform; tydliga krav; rimliga SLO:er | Leverantörsberoenden (CloudFrame, Lumeon) utanför hans kontroll; framtida krav utan resursökning | Leverantörs-SLA:er dokumenterade; öppna risker i riskregistret; CI-register för framtida krav |
-| **Martin Lindqvist** | CIO; sponsor och CAB-ordförande | Affärsvärde levereras; kostnader under kontroll; inga pinsamma incidenter | Att go-live är för tidigt; att tjänsten skadar NordTechs rykte internt | Executive summary med tydlig go/no-go-struktur; villkorat godkännande; hypercare-plan |
-| **Erik Holm** | CFO | Kostnadskontroll; tydlig ROI; inga överraskningar | Tokenkostnader skenar; investering levererar inte deflection; dolda leverantörskostnader | SLO för deflection rate; kostnadslarm i CloudFrame; kvartalsmöte med Anna Berg och Karl Eek |
-| **Lina Nordin** | Head of HR | Smidig onboarding-upplevelse för nya medarbetare; korrekt HR-information | Att NordIQ ger fel information om HR-processer; att nya medarbetare har dålig upplevelse | Lina involverad i UAT för onboarding-flödet; dedikerat onboarding-FAQ-paket; Lina äger CI-01 |
-| **CloudFrame Nordic** | Leverantör – AI-infrastruktur | Stabil drift; tydliga krav; rimlig felanmälningsprocess | Otydliga SLA-krav; fler kunder med konfliktande prioriteringar | SLA-avtal med P1-kommunikation inom 30 min; status i SLO-uppföljning; kontaktperson dokumenterad |
-| **Lumeon API** | Leverantör – ärendehantering och routing | Korrekt API-användning; stabil integration | Onormal belastning; felaktig implementering som ger supportbörda | Integrationsdokumentation upprätthålls av Karl Eek; SLA-krav dokumenterade; fallback-plan vid avbrott |
-| **CAB** | Change Advisory Board; godkänner RFC | Välunderbyggt beslutsunderlag; inga obehagliga överraskningar; tydlig rollback-plan | Otillräcklig testning; otydliga risker; otydligt ansvar post go-live | Fullständigt RFC-dokument med go/no-go-kriterier; testbevis; villkorad rekommendation |
+|-------------|------|-------------|----------------------|---------------------|
+| **Medarbetare** (~450) | Primär konsument av NordIQ | Snabb, begriplig hjälp utan att veta rätt supportväg; support även utanför kontorstid. | Att AI:n ger fel svar eller gör det svårare att nå människa. | Tydlig eskalering till människa, begränsat go-live-scope och uppföljning av feedback. |
+| **First line support** (4 personer) | Påverkad intern grupp | Mindre repetitivt FAQ-inflöde och tydligare eskaleringar. | Att rollen förändras utan tydligt ansvar, eller att second line får sämre underlag. | Involvera first line i request models; mät eskaleringskvalitet; tydliggör att rollen förändras, inte försvinner. |
+| **Second line / specialister** | Löser komplexa ärenden | Välstrukturerade ärenden med kategori, prioritet och kontext. | Dåliga eskaleringar och otydliga prioriteringar. | SLO för eskaleringskvalitet och stickprov i befintligt ärendehanteringssystem. |
+| **Anna Berg** | IT Ops Lead; driftmottagare | Tydlig driftmodell, SLO:er, runbook och mandat för incident/rollback. | Att ta över en tjänst utan tillräckligt verifierad driftberedskap. | Handover som go-live-villkor; öppna risker och leverantörsvägar dokumenteras. |
+| **Karl Eek** | Internal Dev Lead; plattformsansvarig | Få AI Agent Platform redo för drift och mätning. | Att leverantörsberoenden eller driftkrav bromsar plattformen sent. | Översätt SLO:er till tekniska krav och tydliggör vad som är driftconstraint. |
+| **Martin Lindqvist** | CIO; beställare och go-live-beslutsägare | Board-ready story, kontrollerad risk och tydligt CAB-underlag. | Att go-live sker för tidigt eller blir politiskt synligt misslyckande. | Executive summary, go/no-go-kriterier och riskregister utan falsk evidens. |
+| **Erik Holm** | CFO; äger leverantörsavtal | Förutsägbar run-rate, tokenkostnad och leverantörsrisk. | Tokenkostnader, dolda leverantörsbegränsningar och oklara supplier constraints. | Lumeon API-användning och leverantörs-SLA granskas före CAB; inga kostnadslarm antas vara på plats utan verifiering. |
+| **Lina Nordin** | Head of HR; tung användare av first-line support | Nyanställda ska få snabbare svar på återkommande onboardingfrågor. | Att nya medarbetare får fel information eller fastnar i supportflödet. | Planerad sakgranskning för onboarding-scope innan det släpps brett. |
+| **CloudFrame Nordic** | Extern leverantör - hostingplattform för AI Agent Platform | Stabil hosting och tydlig supportväg. | Otydliga krav eller felaktiga förväntningar på SLA. | Faktisk SLA och supportväg måste granskas som go-live-constraint. |
+| **Lumeon API** | Extern leverantör - LLM API för agentlagret | Stabil LLM API-tjänst och förutsägbar tokenförbrukning. | Onormal belastning, latens eller kostnadsökning. | Följ LLM API-tillgänglighet, latens och tokenkostnad; operativ eskalering ligger i separat system enligt dokumenten. |
+| **Befintligt ärendehanteringssystem** | Systemberoende för eskalering och uppföljning | Ärenden ska kunna registreras, routas och följas upp. | Om detta flöde brister tappar NordIQ spårbarhet och second line får sämre underlag. | Behandlas som eget beroende eftersom skolmaterialet inte namnger systemet. |
+| **CAB** | Godkänner change/RFC | Välunderbyggt beslutsunderlag utan överraskningar. | Otillräcklig testning, otydliga risker och otydligt ansvar post go-live. | RFC med verifieringsstatus, go/no-go-kriterier och rollback-villkor. |
 
 ---
 
 ## Prioriteringsmatris
 
-```
+```text
 INFLYTANDE
-   Högt │  Martin L.  │  CAB        │
-        │  Erik H.    │  Anna B.    │
-   Lågt │  Lina N.    │  Medarbetare│
-        │  CloudFrame │  Second line│
-        └─────────────┴─────────────┘
+   Högt │  Martin L.  │  CAB / Anna B. │
+        │  Erik H.    │  Karl E.       │
+   Lågt │  Lina N.    │  Medarbetare   │
+        │  Leverant.  │  First/Second  │
+        └─────────────┴────────────────┘
               Lågt          Högt     INTRESSE/PÅVERKAN
 ```
 
 **Strategi:**
-- **Högt inflytande + högt intresse:** Nära dialog; inkludera i beslut (Martin, CAB, Anna)
-- **Högt inflytande + lågt intresse:** Informera regelbundet; undvik överraskningar (Erik)
-- **Lågt inflytande + högt intresse:** Involvera i pilottest och feedback (medarbetare, second line)
-- **Leverantörer:** Hantera via SLA och formell kontakt
+- **Högt inflytande + högt intresse:** Nära dialog och tydliga beslutspunkter (Martin, CAB, Anna, Karl).
+- **Högt inflytande + lägre daglig påverkan:** Informera utan att överbelasta (Erik).
+- **Lägre inflytande + hög påverkan:** Involvera i pilot, sakgranskning och feedback (medarbetare, first line, second line, Lina).
+- **Leverantörer:** Hantera via faktiska SLA:er, supportvägar och constraints.

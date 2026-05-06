@@ -1,100 +1,102 @@
-# Operational Readiness – NordIQ
+# Operational Readiness - NordIQ
 
 > **Dokumenttyp:** Driftunderlag  
 > **Ägare:** Anna Berg  
 > **Teknisk kontakt:** Karl Eek  
-> **Version:** 1.0
+> **Version:** 1.0  
+> **Status:** Utkast - arbetssätt och kontakter behöver verifieras före go-live
 
 ---
 
 ## 1. Service Request Flow
 
-```
+```text
 Medarbetare
-    │
-    ▼
-[Teams / Mejl / Webbportal]
-    │
-    ▼
+    |
+    v
+[Teams / mejl / webbportal]
+    |
+    v
 NordIQ (AI-agent)
-    ├──→ Direkt svar (kunskapsbas, FAQ)
-    │        └──→ Ärendet stängs + feedback samlas
-    │
-    ├──→ Strukturerad ticket skapas (via Lumeon)
-    │        └──→ Second line / rätt grupp
-    │                 └──→ Lösning bekräftad
-    │                          └──→ Kunskapsbas uppdateras (CI)
-    │
-    └──→ P1/P2 detekteras
-             └──→ Omedelbar eskalering till on-call (< 60 s)
+    |--> Direkt svar (kunskapsbas / FAQ)
+    |       `--> Ärendet avslutas eller feedback samlas
+    |
+    |--> Strukturerad ticket skapas i befintligt ärendehanteringssystem
+    |       `--> Second line / rätt grupp
+    |              `--> Lösning bekräftad
+    |                     `--> Kunskapsbas och CI-register uppdateras vid behov
+    |
+    `--> P1/P2 eller osäkert ärende detekteras
+            `--> Omedelbar eskalering till människa enligt on-call-väg
 ```
 
 **Nyckelprinciper:**
-- NordIQ stänger aldrig ett P1/P2-ärende utan mänsklig bekräftelse
-- Alla ärenden får ett Lumeon-ärendenummer oavsett kanal
-- Kunskapsbasen uppdateras efter varje ny kategori av ärende som löses
+- NordIQ stänger aldrig ett P1/P2-ärende utan mänsklig bekräftelse.
+- Ärenden som inte löses direkt ska kunna följas i befintligt ärendehanteringssystem.
+- Kunskapsluckor och felklassificeringar ska bli input till Continual Improvement.
+- Lumeon API används som LLM API för agentlagret. Operativ eskalering sker i separat befintligt system.
 
 ---
 
-## 2. Incidentnivåer (P1–P4)
+## 2. Incidentnivåer (P1-P4)
 
-| Prioritet | Definition | Exempel | Responstid | Eskaleras till |
-|-----------|-----------|---------|------------|----------------|
-| **P1 – Kritisk** | Tjänsten är helt nere eller kritisk data är exponerad | NordIQ svarar inte; autentisering bruten | Omedelbart (< 5 min) | Anna Berg + Karl Eek + Martin Lindqvist |
-| **P2 – Hög** | Allvarlig störning som påverkar ≥ 10 % av användare | Deflection fungerar inte; Lumeon API ej tillgängligt | < 30 min | Anna Berg + Karl Eek |
-| **P3 – Medel** | Begränsad störning; workaround finns | Enstaka kanal ner (t.ex. Teams-bot); felrouting | < 4 timmar | On-call second line |
-| **P4 – Låg** | Kosmetisk eller icke-kritisk | Stavfel i svar; felaktig artikel i kunskapsbas | < 2 arbetsdagar | Karl Eek (backlog) |
+| Prioritet | Definition | Exempel | Föreslagen responstid | Eskaleras till |
+|-----------|------------|---------|-----------------------|----------------|
+| **P1 - Kritisk** | NordIQ eller kritiskt supportflöde är nere, eller säkerhetsincident misstänks. | CloudFrame-hostad plattform nere; kritisk data exponerad. | Omedelbart. Exakt minutkrav behöver beslutas. | Anna Berg + Karl Eek + Martin Lindqvist |
+| **P2 - Hög** | Allvarlig störning som påverkar många användare eller gör agenten otillförlitlig. | Lumeon API instabilt; P1/P2-klassificering fungerar inte; deflection faller kraftigt. | Inom definierad on-call-rutin. | Anna Berg + Karl Eek |
+| **P3 - Medel** | Begränsad störning med workaround. | En kanal nere; felrouting av enstaka ärendetyper. | Inom arbetsdag eller enligt SLO. | On-call / second line |
+| **P4 - Låg** | Mindre fel utan omedelbar driftpåverkan. | Felaktig eller inaktuell kunskapsbasartikel. | Backlog / CI-register. | Karl Eek eller utsedd kunskapsägare |
 
 ### Vad ska alltid eskaleras till människa
 
-- Säkerhetsincidenter (misstänkt intrång, dataläckage)
-- Ärenden som rör personuppgifter eller GDPR
-- Alla P1/P2 utan undantag
-- Ärenden där medarbetaren explicit ber om mänsklig kontakt
-- Ärenden med felaktig eller inkonsekvent AI-klassificering (flaggas automatiskt)
+- Misstänkt säkerhetsincident eller dataläckage.
+- Ärenden som rör personuppgifter eller behörigheter.
+- Alla P1/P2 utan undantag.
+- Ärenden där medarbetaren explicit ber om mänsklig kontakt.
+- Ärenden där agenten är osäker eller ger inkonsekvent klassificering.
 
 ---
 
 ## 3. Major Incident Playbook (förenklad)
 
-**Trigger:** P1-incident detekteras automatiskt ELLER rapporteras av medarbetare/second line.
+**Trigger:** P1-incident detekteras automatiskt eller rapporteras av medarbetare, first line eller second line.
 
-| Steg | Åtgärd | Ansvarig | Tid |
-|------|--------|----------|-----|
-| 1 | Bekräfta incident och skapa P1-ticket i Lumeon | On-call | < 5 min |
-| 2 | Notifiera Anna Berg och Karl Eek (SMS + Teams) | Automatisk | Omedelbart |
-| 3 | Aktivera fallback (manuell first line) | Anna Berg | < 15 min |
-| 4 | Identifiera root cause (preliminärt) | Karl Eek | < 30 min |
-| 5 | Kommunicera status till medarbetare via Teams | Anna Berg | < 30 min |
-| 6 | Eskalera till leverantör (CloudFrame/Lumeon) vid behov | Karl Eek | < 45 min |
-| 7 | Lösa eller begränsa påverkan | Karl Eek + Leverantör | Varierar |
-| 8 | Post-incident review inom 48 h | Anna Berg | < 48 h |
-| 9 | Uppdatera kunskapsbas och risk-register | Karl Eek | < 5 dagar |
+| Steg | Åtgärd | Ansvarig | Status |
+|------|--------|----------|--------|
+| 1 | Bekräfta incident och skapa P1-ärende i befintligt ärendehanteringssystem. | On-call / first responder | Planerad rutin |
+| 2 | Notifiera Anna Berg och Karl Eek via beslutad kanal. | On-call / automatisk larmning om sådan finns | Planerad verifiering |
+| 3 | Aktivera fallback till manuell first line vid behov. | Anna Berg | Go-live-förutsättning |
+| 4 | Identifiera preliminär root cause: CloudFrame, Lumeon API, agentlogik, kunskapsbas eller internt flöde. | Karl Eek | Planerad rutin |
+| 5 | Kommunicera status till medarbetare via beslutad kanal. | Anna Berg | Planerad rutin |
+| 6 | Eskalera till CloudFrame eller Lumeon API när leverantörsberoende misstänks. | Karl Eek / Erik Holm beroende på kontraktsväg | Planerad verifiering |
+| 7 | Begränsa påverkan eller stäng av NordIQ-agentförmåga tillfälligt. | Anna Berg + Karl Eek | Go-live-förutsättning |
+| 8 | Håll post-incident review efter P1/P2. | Anna Berg | Planerad rutin |
+| 9 | Uppdatera kunskapsbas, riskregister och CI-register. | Karl Eek / utsedd ägare | Planerad rutin |
 
-*Se fullständig spelbok: [templates/incident-playbook-template.md](../templates/incident-playbook-template.md)*
+*Se fullständig spelboksmall: [templates/incident-playbook-template.md](../templates/incident-playbook-template.md).*
 
 ---
 
 ## 4. Problem Management
 
-**Ansvarig:** Anna Berg (Problem Manager, delegerat till Karl Eek för tekniska problem)
+**Ansvarig:** Anna Berg, med tekniskt stöd från Karl Eek.
 
-- Alla P1/P2-incidenter utreds för underliggande orsak (Root Cause Analysis)
-- Återkommande P3-incidenter (≥ 3 på 30 dagar) eskaleras till problem management
-- Problem-tickets hanteras i Lumeon med länk till relaterade incidents
-- Known errors dokumenteras i kunskapsbasen med workaround
+- Alla P1/P2 bör utredas för underliggande orsak.
+- Återkommande P3-mönster bör eskaleras till problem management.
+- Problemärenden ska hanteras i befintligt ärendehanteringssystem eller annat beslutat problemverktyg.
+- Known errors och workarounds ska dokumenteras i kunskapsbasen.
 
-**Antagande:** Problem management-processen används i begränsad form under de första 90 dagarna. Fullt processtöd från Lumeon aktiveras i fas 2.
+**Antagande:** Problem management används i enkel form under första perioden. Fullt processtöd är inte etablerat i skolmaterialet och ska inte beskrivas som infört.
 
 ---
 
 ## 5. Continual Improvement
 
-- Månadsvis CI-möte leds av Anna Berg
-- Input: SLO-rapport, användarfeedback, incidentlogg, eskaleringsdata
-- Output: Uppdaterat [ci-register.md](ci-register.md)
-- Prioritering görs mot affärsvärde och resurskapacitet
-- Resultat kommuniceras till Martin Lindqvist kvartalsvis
+- Månadsvis CI-möte föreslås ledas av Anna Berg.
+- Input: SLO-rapport, användarfeedback, incidentlogg, eskaleringsdata och kunskapsbasluckor.
+- Output: Uppdaterat [ci-register.md](ci-register.md).
+- Prioritering bör göras mot affärsvärde, risk och resurskapacitet.
+- Resultat kan rapporteras till Martin Lindqvist kvartalsvis efter go-live.
 
 ---
 
@@ -102,25 +104,26 @@ NordIQ (AI-agent)
 
 | Roll | Person | Kontakt | Tillgänglighet |
 |------|--------|---------|----------------|
-| IT Ops Lead (primär) | Anna Berg | [telefon] | Vardagar 08–18; on-call via SMS |
-| Dev Lead (tech) | Karl Eek | [telefon] | Vardagar 08–18; on-call vid P1/P2 |
-| CloudFrame support | [kontaktperson] | [support-mejl] | Enligt SLA (24/7 för P1) |
-| Lumeon support | [kontaktperson] | [support-mejl] | Enligt SLA (24/7 för P1) |
-| CIO (eskaleringsslut) | Martin Lindqvist | [telefon] | Vardagar; nås via Anna vid P1 |
+| IT Ops Lead (primär) | Anna Berg | Ej verifierad | Behöver beslutas före go-live |
+| Dev Lead (tech) | Karl Eek | Ej verifierad | Behöver beslutas före go-live |
+| CloudFrame support | Ej verifierad | Ej verifierad | Enligt faktiskt CloudFrame-avtal |
+| Lumeon API support | Ej verifierad | Ej verifierad | Enligt faktiskt Lumeon-avtal |
+| CIO (eskaleringsslut) | Martin Lindqvist | Via Anna Berg | Vid P1 eller större riskbeslut |
 
-*Se eskalerings­diagram: [diagrams/escalation-map.mmd](../diagrams/escalation-map.mmd)*
+*Se eskaleringsdiagram: [diagrams/escalation-map.mmd](../diagrams/escalation-map.mmd).*
 
 ---
 
 ## 7. Handover till Anna Berg
 
-Anna Berg tar över driftansvar för NordIQ från go-live-datum. Handover inkluderar:
+Anna Berg kan ta över driftansvar först när följande är verifierat:
 
-- [ ] Tillgång till CloudFrame-dashboard och larmprofiler
-- [ ] Tillgång till Lumeon-admin och rapportmiljö
-- [ ] Dokumentation av eskaleringsvägar och on-call-schema
-- [ ] Genomgång av kända svagheter och öppna risker (se [risk-register.md](risk-register.md))
-- [ ] Signerat driftövertagandedokument
-- [ ] Introduktion till CI-processen och första CI-möte bokat (datum + 30 dagar)
+- [ ] Tillgång till CloudFrame-status, avtalad supportväg och relevant driftinformation.
+- [ ] Tillgång till Lumeon API-status/usage-rapportering om sådan finns.
+- [ ] Tillgång till befintligt ärendehanteringssystem och relevanta rapporter.
+- [ ] Dokumentation av eskaleringsvägar och on-call-schema.
+- [ ] Genomgång av kända svagheter och öppna risker (se [risk-register.md](risk-register.md)).
+- [ ] Driftövertagande granskat och accepterat som go-live-förutsättning.
+- [ ] Första CI-möte planerat efter go-live.
 
-**Antagande:** Formellt handover sker minst 3 dagar före go-live för att Anna Berg ska ha tid att validera miljön.
+**Antagande:** Formellt handover bör ske före go-live så att Anna Berg hinner validera miljö, leverantörsvägar och fallback.
