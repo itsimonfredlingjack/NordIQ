@@ -4,11 +4,14 @@ import { AgentOrb } from "@/components/AgentOrb";
 import { AgentMessage } from "@/components/chat/AgentMessage";
 import { Composer } from "@/components/Composer";
 import { HistoryRail } from "@/components/HistoryRail";
+import { SystemHealthBanner } from "@/components/SystemHealthPanel";
 import { useNordIQAgent } from "@/hooks/useNordIQAgent";
+import { useSystemHealth } from "@/hooks/useSystemHealth";
 import { caseFlows, me } from "@/lib/mock-data";
 
 export function ChatView() {
   const agent = useNordIQAgent();
+  const { services } = useSystemHealth(agent.model);
   const [composerValue, setComposerValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -48,8 +51,7 @@ export function ChatView() {
       <HistoryRail
         recent={recent}
         activeChatId={agent.chatId}
-        model={agent.model}
-        modelHealth={agent.modelHealth}
+        services={services}
         onNewChat={handleNewChat}
         onOpenChat={agent.openChat}
         onUseSuggestion={handleSuggestion}
@@ -67,6 +69,11 @@ export function ChatView() {
             </span>
           </div>
         </header>
+
+        {/* Slim system-health banner — only shows when something is degraded */}
+        <div className="px-6">
+          <SystemHealthBanner services={services} />
+        </div>
 
         {/* Main */}
         {agent.mode === "hero" ? (

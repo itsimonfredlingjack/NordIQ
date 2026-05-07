@@ -39,5 +39,6 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   classification?: DecisionType;
+  confidence?: "high" | "medium" | "low";
   attachments?: ChatAttachment[];
 }

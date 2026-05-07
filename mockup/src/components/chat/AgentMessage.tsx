@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { AgentOrb } from "@/components/AgentOrb";
+import { AlertCircle } from "lucide-react";
+import { AgentOrb, type OrbTone } from "@/components/AgentOrb";
 import { TicketDraftCard } from "./TicketDraftCard";
 import { EscalationBanner } from "./EscalationBanner";
 import { KBLinkCard } from "./KBLinkCard";
@@ -19,6 +20,13 @@ const stripeLabel: Record<DecisionType, string> = {
   "follow-up": "asking back",
   "ticket-created": "ticket opened",
   "incident-flagged": "handed off",
+};
+
+const orbTone: Record<DecisionType, OrbTone> = {
+  "direct-answer": "default",
+  "follow-up": "warm",
+  "ticket-created": "warm",
+  "incident-flagged": "alert",
 };
 
 export function AgentMessage({ msg }: { msg: ChatMessage }) {
@@ -48,6 +56,7 @@ export function AgentMessage({ msg }: { msg: ChatMessage }) {
   // agent
   const stripe = msg.classification ? stripeColor[msg.classification] : undefined;
   const label = msg.classification ? stripeLabel[msg.classification] : undefined;
+  const tone: OrbTone = msg.classification ? orbTone[msg.classification] : "default";
 
   return (
     <motion.div
@@ -56,7 +65,7 @@ export function AgentMessage({ msg }: { msg: ChatMessage }) {
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="flex gap-3"
     >
-      <AgentOrb size={28} className="mt-0.5" />
+      <AgentOrb size={28} tone={tone} className="mt-0.5" />
       <div className="min-w-0 flex-1">
         {label && (
           <div className="mb-1 flex items-center gap-2 text-[11px] text-[var(--color-fg-subtle)]">
@@ -68,11 +77,26 @@ export function AgentMessage({ msg }: { msg: ChatMessage }) {
             <span className="opacity-50 font-mono">
               {formatTime(msg.timestamp)}
             </span>
+            {msg.confidence === "low" && (
+              <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-[oklch(40%_0.08_70)] bg-[oklch(20%_0.03_70)] px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-warm)]">
+                <AlertCircle className="h-2.5 w-2.5" />
+                low confidence
+              </span>
+            )}
           </div>
         )}
         <div className="text-[14.5px] leading-relaxed text-[var(--color-fg)]">
           {msg.content}
         </div>
+        {msg.confidence === "low" && (
+          <div className="mt-2 flex items-start gap-2 rounded-md border border-[oklch(40%_0.08_70)] bg-[oklch(20%_0.03_70)] px-3 py-2 text-[12px] text-[var(--color-fg-muted)]">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-warm)]" />
+            <span>
+              I'm not 100% certain about this — if you'd rather a human
+              verify, say <em>"open a ticket"</em> and I'll route it.
+            </span>
+          </div>
+        )}
 
         {msg.attachments?.map((a, i) => {
           if (a.kind === "kb") return <KBLinkCard key={i} sources={a.sources} />;

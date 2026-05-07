@@ -1,24 +1,23 @@
 import { Plus, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AgentOrb } from "@/components/AgentOrb";
-import { ModelStatusPill } from "@/components/ModelStatusPill";
+import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 import { caseFlows } from "@/lib/mock-data";
 import type { StoredChat } from "@/lib/chat-store";
+import type { ServiceHealth } from "@/hooks/useSystemHealth";
 import { cn } from "@/lib/utils";
 
 export function HistoryRail({
   recent,
   activeChatId,
-  model,
-  modelHealth,
+  services,
   onNewChat,
   onOpenChat,
   onUseSuggestion,
 }: {
   recent: StoredChat[];
   activeChatId: string | null;
-  model: string;
-  modelHealth: "unknown" | "reachable" | "unreachable";
+  services: ServiceHealth[];
   onNewChat: () => void;
   onOpenChat: (id: string) => void;
   onUseSuggestion: (prompt: string) => void;
@@ -91,9 +90,9 @@ export function HistoryRail({
         </Section>
       </div>
 
-      {/* Footer — model status */}
+      {/* Footer — system health */}
       <div className="border-t border-[var(--color-border)] px-3 py-3">
-        <ModelStatusPill model={model} health={modelHealth} />
+        <SystemHealthPanel services={services} />
       </div>
     </aside>
   );

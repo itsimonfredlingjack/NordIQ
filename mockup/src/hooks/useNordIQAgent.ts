@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as ollama from "@/lib/ollama/adapter";
 import { buildMessages } from "@/lib/ollama/prompt";
+import { extract, tagToAttachments } from "@/lib/ollama/parse";
 import * as store from "@/lib/chat-store";
 import type { ChatMessage } from "@/lib/types";
 
@@ -153,20 +154,48 @@ export function useNordIQAgent() {
             firstToken = false;
             setState((s) => ({ ...s, thinking: false }));
           }
-          // Update the placeholder content live.
+          const { visible, tag } = extract(buf);
+          // Update the placeholder live. Hide tag fragment from view.
           setState((s) => ({
             ...s,
             messages: s.messages.map((m) =>
-              m.id === agentId ? { ...m, content: buf } : m,
+              m.id === agentId
+                ? {
+                    ...m,
+                    content: visible,
+                    classification: tag?.classification ?? m.classification,
+                    confidence: tag?.confidence ?? m.confidence,
+                    attachments: tag ? tagToAttachments(tag) : m.attachments,
+                  }
+                : m,
             ),
           }));
         }
 
-        // Done — persist final state.
+        // Final pass — make sure we've extracted the tag even if it
+        // landed in the very last chunk.
+        const final = extract(buf);
         setState((s) => {
-          const finalMessages = s.messages;
-          persist(chatId, finalMessages);
-          return { ...s, streaming: false, thinking: false };
+          const updated = s.messages.map((m) =>
+            m.id === agentId
+              ? {
+                  ...m,
+                  content: final.visible,
+                  classification: final.tag?.classification ?? m.classification,
+                  confidence: final.tag?.confidence ?? m.confidence,
+                  attachments: final.tag
+                    ? tagToAttachments(final.tag)
+                    : m.attachments,
+                }
+              : m,
+          );
+          persist(chatId, updated);
+          return {
+            ...s,
+            messages: updated,
+            streaming: false,
+            thinking: false,
+          };
         });
       } catch (e) {
         if ((e as Error).name === "AbortError") {
