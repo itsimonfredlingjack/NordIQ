@@ -23,6 +23,21 @@ export interface OllamaModelInfo {
   family?: string;
 }
 
+export interface ChatMeta {
+  /** ms to load the model into memory (≈ 0 if hot, multi-second if cold) */
+  loadMs: number;
+  /** tokens in the prompt that were evaluated */
+  promptEvalCount: number;
+  /** ms spent prefilling the prompt (≈ 0 if cache hit) */
+  promptEvalMs: number;
+  /** tokens generated */
+  evalCount: number;
+  /** ms spent generating */
+  evalMs: number;
+  /** total wall-clock ms */
+  totalMs: number;
+}
+
 export interface ChatOptions {
   model: string;
   messages: OllamaMessage[];
@@ -33,6 +48,8 @@ export interface ChatOptions {
   keepAlive?: string | number;
   // forwarded to Ollama: temperature, top_p, num_predict, …
   options?: Record<string, number | string | boolean>;
+  /** Fired once with the final telemetry payload from the done frame. */
+  onComplete?: (meta: ChatMeta) => void;
 }
 
 // ---------------------------------------------------------------------
@@ -115,6 +132,7 @@ export async function* chat({
   signal,
   keepAlive = "30m",
   options,
+  onComplete,
 }: ChatOptions): AsyncIterable<string> {
   const r = await fetch(`${BASE}/api/chat`, {
     method: "POST",
@@ -162,11 +180,29 @@ export async function* chat({
           message?: { content?: string };
           done?: boolean;
           error?: string;
+          total_duration?: number;
+          load_duration?: number;
+          prompt_eval_count?: number;
+          prompt_eval_duration?: number;
+          eval_count?: number;
+          eval_duration?: number;
         };
         if (obj.error) throw new Error(`Ollama: ${obj.error}`);
         const piece = obj.message?.content;
         if (piece) yield piece;
-        if (obj.done) return;
+        if (obj.done) {
+          if (onComplete && obj.total_duration !== undefined) {
+            onComplete({
+              loadMs: (obj.load_duration ?? 0) / 1e6,
+              promptEvalCount: obj.prompt_eval_count ?? 0,
+              promptEvalMs: (obj.prompt_eval_duration ?? 0) / 1e6,
+              evalCount: obj.eval_count ?? 0,
+              evalMs: (obj.eval_duration ?? 0) / 1e6,
+              totalMs: (obj.total_duration ?? 0) / 1e6,
+            });
+          }
+          return;
+        }
       } catch (e) {
         // Don't kill the stream on a single bad line — Ollama occasionally
         // emits a fragment when the upstream model errors. Re-throw if it's

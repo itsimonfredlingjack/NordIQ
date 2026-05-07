@@ -23,6 +23,10 @@ interface AgentState {
   error: string | null;
   model: string;
   modelHealth: "unknown" | "reachable" | "unreachable";
+  /** Telemetry from the last completed turn — used by DevHealthPanel. */
+  lastMeta: ollama.ChatMeta | null;
+  /** Whether the last turn closed with a valid <NORDIQ /> tag. */
+  lastTagValid: boolean | null;
 }
 
 export function useNordIQAgent() {
@@ -38,6 +42,8 @@ export function useNordIQAgent() {
       error: null,
       model: store.getModel(),
       modelHealth: "unknown",
+      lastMeta: null,
+      lastTagValid: null,
     };
   });
 
@@ -157,6 +163,8 @@ export function useNordIQAgent() {
           messages: buildMessages(priorMessages, trimmed),
           signal: abortRef.current.signal,
           keepAlive: "30m",
+          onComplete: (meta) =>
+            setState((s) => ({ ...s, lastMeta: meta })),
         });
 
         for await (const piece of stream) {
@@ -206,6 +214,7 @@ export function useNordIQAgent() {
             messages: updated,
             streaming: false,
             thinking: false,
+            lastTagValid: final.tag !== null,
           };
         });
       } catch (e) {

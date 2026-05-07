@@ -52,6 +52,8 @@ export function ChatView() {
         recent={recent}
         activeChatId={agent.chatId}
         services={services}
+        lastMeta={agent.lastMeta}
+        lastTagValid={agent.lastTagValid}
         onNewChat={handleNewChat}
         onOpenChat={agent.openChat}
         onUseSuggestion={handleSuggestion}

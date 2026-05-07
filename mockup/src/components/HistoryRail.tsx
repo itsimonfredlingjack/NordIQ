@@ -2,15 +2,19 @@ import { Plus, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AgentOrb } from "@/components/AgentOrb";
 import { SystemHealthPanel } from "@/components/SystemHealthPanel";
+import { DevHealthPanel } from "@/components/DevHealthPanel";
 import { caseFlows } from "@/lib/mock-data";
 import type { StoredChat } from "@/lib/chat-store";
 import type { ServiceHealth } from "@/hooks/useSystemHealth";
+import type { ChatMeta } from "@/lib/ollama/adapter";
 import { cn } from "@/lib/utils";
 
 export function HistoryRail({
   recent,
   activeChatId,
   services,
+  lastMeta,
+  lastTagValid,
   onNewChat,
   onOpenChat,
   onUseSuggestion,
@@ -18,6 +22,8 @@ export function HistoryRail({
   recent: StoredChat[];
   activeChatId: string | null;
   services: ServiceHealth[];
+  lastMeta: ChatMeta | null;
+  lastTagValid: boolean | null;
   onNewChat: () => void;
   onOpenChat: (id: string) => void;
   onUseSuggestion: (prompt: string) => void;
@@ -109,6 +115,9 @@ export function HistoryRail({
       <div className="border-t border-[var(--color-border)] px-3 py-3">
         <SystemHealthPanel services={services} />
       </div>
+
+      {/* Dev-only telemetry — invisible in production builds */}
+      <DevHealthPanel meta={lastMeta} tagValid={lastTagValid} />
     </aside>
   );
 }
