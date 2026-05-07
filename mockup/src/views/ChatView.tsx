@@ -1,118 +1,63 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
 import { AgentOrb } from "@/components/AgentOrb";
 import { AgentMessage } from "@/components/chat/AgentMessage";
 import { Composer } from "@/components/Composer";
-import { Button } from "@/components/ui/button";
+import { HistoryRail } from "@/components/HistoryRail";
+import { useNordIQAgent } from "@/hooks/useNordIQAgent";
 import { caseFlows, me } from "@/lib/mock-data";
-import type { ChatMessage, CaseFlow } from "@/lib/types";
-
-type Mode = "hero" | "playing";
 
 export function ChatView() {
-  const [mode, setMode] = useState<Mode>("hero");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const agent = useNordIQAgent();
   const [composerValue, setComposerValue] = useState("");
-  const [thinking, setThinking] = useState(false);
-  const scriptRef = useRef<{ flow: CaseFlow; idx: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Re-read recent on each render (cheap — localStorage list of ≤8).
+  const recent = useMemo(
+    () => agent.recent(),
+    // recreate when the active chat or its message count changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [agent.chatId, agent.messages.length, agent.streaming],
+  );
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages, thinking]);
-
-  const startFlow = (flow: CaseFlow) => {
-    scriptRef.current = { flow, idx: 1 };
-    setMessages([flow.steps[0]]);
-    setMode("playing");
-    advanceScript();
-  };
-
-  // Auto-play remaining steps. Agent steps show a thinking pulse, user
-  // steps appear after a typing pause. Demo is passive.
-  const advanceScript = () => {
-    const s = scriptRef.current;
-    if (!s) return;
-    const next = s.flow.steps[s.idx];
-    if (!next) return;
-
-    if (next.author === "agent") {
-      setThinking(true);
-      window.setTimeout(() => {
-        setThinking(false);
-        setMessages((prev) => [...prev, next]);
-        s.idx += 1;
-        window.setTimeout(advanceScript, 700);
-      }, 950);
-    } else {
-      // user message — short pause to feel natural, no thinking dots
-      window.setTimeout(() => {
-        setMessages((prev) => [...prev, next]);
-        s.idx += 1;
-        window.setTimeout(advanceScript, 500);
-      }, 1200);
-    }
-  };
+  }, [agent.messages, agent.thinking]);
 
   const handleSend = () => {
-    if (!composerValue.trim()) return;
-    // Free chat — echo user, agent gives a soft fallback. Scripted flows
-    // are auto-played from chips; the composer is just for free messages.
-    scriptRef.current = null;
-    const userMsg: ChatMessage = {
-      id: `u-${Date.now()}`,
-      author: "user",
-      content: composerValue.trim(),
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
+    const text = composerValue.trim();
+    if (!text) return;
     setComposerValue("");
-    setMode("playing");
-    setThinking(true);
-    window.setTimeout(() => {
-      setThinking(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `a-${Date.now()}`,
-          author: "agent",
-          timestamp: new Date().toISOString(),
-          classification: "follow-up",
-          content:
-            "This mockup only plays the three scripted scenarios above. Pick one of the chips for a complete walk-through.",
-        },
-      ]);
-    }, 900);
+    void agent.send(text);
   };
 
-  const reset = () => {
-    scriptRef.current = null;
-    setMessages([]);
-    setMode("hero");
+  const handleSuggestion = (prompt: string) => {
     setComposerValue("");
-    setThinking(false);
+    void agent.send(prompt);
+  };
+
+  const handleNewChat = () => {
+    setComposerValue("");
+    agent.newChat();
   };
 
   return (
-    <div className="ambient flex h-dvh flex-col">
-      {/* Top — minimal brand left, profile right */}
-      <header className="flex shrink-0 items-center justify-between px-6 py-5">
-        <div className="flex items-center gap-2.5">
-          <AgentOrb size={22} active={mode === "playing"} />
-          <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--color-fg)]">
-            NordIQ
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          {mode === "playing" && (
-            <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5">
-              <Plus className="h-3.5 w-3.5" />
-              New chat
-            </Button>
-          )}
+    <div className="ambient flex h-dvh">
+      <HistoryRail
+        recent={recent}
+        activeChatId={agent.chatId}
+        model={agent.model}
+        modelHealth={agent.modelHealth}
+        onNewChat={handleNewChat}
+        onOpenChat={agent.openChat}
+        onUseSuggestion={handleSuggestion}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Top — minimal, just the user chip */}
+        <header className="flex shrink-0 items-center justify-end px-6 py-5">
           <div className="flex items-center gap-2.5 rounded-full pl-1 pr-3">
             <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--color-surface)] text-[11px] font-semibold text-[var(--color-fg)]">
               {me.initials}
@@ -121,11 +66,10 @@ export function ChatView() {
               {me.name}
             </span>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main */}
-      {mode === "hero" ? (
+        {/* Main */}
+        {agent.mode === "hero" ? (
           <main className="flex flex-1 items-center justify-center px-6">
             <div className="flex w-full max-w-2xl flex-col items-center gap-10">
               <div className="flex flex-col items-center gap-4">
@@ -146,36 +90,35 @@ export function ChatView() {
                   onSubmit={handleSend}
                   size="lg"
                   placeholder="Ask NordIQ — passwords, access, devices, anything"
+                  disabled={agent.streaming}
                 />
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {caseFlows.map((f) => (
-                  <Button
+              {/* Mobile-only chip row (rail is hidden) */}
+              <div className="flex flex-wrap items-center justify-center gap-2 md:hidden">
+                {caseFlows.slice(0, 4).map((f) => (
+                  <button
                     key={f.id}
-                    variant="chip"
-                    size="sm"
-                    onClick={() => startFlow(f)}
+                    onClick={() => handleSuggestion(f.prompt)}
+                    className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg-2)] px-3 py-1.5 text-[12.5px] text-[var(--color-fg-muted)] transition-colors hover:border-[var(--color-border-2)] hover:text-[var(--color-fg)]"
                   >
                     {f.shortLabel}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
           </main>
         ) : (
-          <main
-            className="flex min-h-0 flex-1 flex-col"
-          >
+          <main className="flex min-h-0 flex-1 flex-col">
             <div
               ref={scrollRef}
               className="flex-1 overflow-y-auto px-6 pb-6 pt-2"
             >
               <div className="mx-auto flex max-w-2xl flex-col gap-5">
-                {messages.map((m) => (
+                {agent.messages.map((m) => (
                   <AgentMessage key={m.id} msg={m} />
                 ))}
-                {thinking && (
+                {agent.thinking && (
                   <div className="flex items-center gap-3 px-1 py-1">
                     <AgentOrb size={28} active className="mt-0.5" />
                     <div className="flex items-center gap-1">
@@ -194,12 +137,18 @@ export function ChatView() {
                   value={composerValue}
                   onChange={setComposerValue}
                   onSubmit={handleSend}
-                  placeholder="Reply or ask something else"
+                  placeholder={
+                    agent.streaming
+                      ? "Streaming…"
+                      : "Reply or ask something else"
+                  }
+                  disabled={agent.streaming}
                 />
               </div>
             </div>
           </main>
         )}
+      </div>
     </div>
   );
 }

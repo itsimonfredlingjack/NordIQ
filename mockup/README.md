@@ -1,6 +1,7 @@
 # NordIQ — chat mockup
 
 Single-screen mockup of the NordIQ employee-facing AI service desk.
+Now wired to a **real local LLM via Ollama** — no scripted flows.
 
 ## Stack
 - Vite + React 18 + TypeScript
@@ -10,7 +11,33 @@ Single-screen mockup of the NordIQ employee-facing AI service desk.
 - lucide-react for icons
 - `@fontsource` for Inter + JetBrains Mono (no external CDN)
 
-## Run
+## Prerequisites — Ollama
+
+The chat surface talks to a local Ollama server. Default model is
+`qwen3.5:4b` (4.7B params, ~3.4 GB on disk, runs comfortably on a Mac
+with 16 GB RAM).
+
+```bash
+# Install: https://ollama.com/download
+brew install --cask ollama        # macOS
+
+# Start the server (keep running in a terminal)
+ollama serve
+
+# In another terminal — pull the default model if you don't have it
+ollama pull qwen3.5:4b
+
+# Verify
+curl http://localhost:11434/api/tags
+```
+
+To use a different model, set in the browser console (or DevTools):
+```js
+localStorage.setItem("nordiq:model", "qwen3.5:9b")
+```
+…then reload the page. A model picker UI is planned for a later phase.
+
+## Run the app
 
 ```bash
 cd mockup
@@ -19,48 +46,85 @@ npm run dev          # http://localhost:5173 (or next free port)
 npm run typecheck
 ```
 
+The dev server proxies `/ollama/*` to `http://localhost:11434` so
+there's no CORS dance. For `npm run preview` (production build) you'd
+need to start Ollama with `OLLAMA_ORIGINS="*" ollama serve`.
+
 ## What's in the mockup
 
-A single chat surface. Hero state on first load (greeting + composer + three quick-action chips). Click a chip — the corresponding case flow auto-plays.
+- Hero state with greeting + composer + suggestions in the left rail.
+- Six starter prompts in the rail. Click one → it's sent live to the
+  model, which streams a reply.
+- Recent chats persist in `localStorage` (max 8). Click an item to
+  reopen the transcript. **+ New chat** clears state and returns to the
+  hero.
+- Model status pill bottom-left of the rail — green dot if Ollama is
+  reachable, red if not. Re-pings every 30 s.
+- The agent is biased toward Swedish by the Nordic context, so we pin
+  the reply language client-side via a quick heuristic in
+  `buildMessages` — English in stays English out, Swedish in stays
+  Swedish out.
 
-Three scripted scenarios ([src/lib/mock-data.ts](src/lib/mock-data.ts) → `caseFlows`):
+## What the agent will and won't do
 
-1. **Reset password** — direct answer with a quiet KB source chip.
-2. **Onboard a consultant** — agent asks the missing fields, then drafts a slim ticket card.
-3. **Several can't log in** — agent refuses to act, hands off to on-call with a calm escalation row.
+The system prompt in `src/lib/ollama/prompt.ts` defines NordIQ's
+behaviour. Hard rules:
 
-Inline cues are deliberately quiet:
-- A short coloured stripe + lowercase verb (`answered` / `asking back` / `ticket opened` / `handed off`) instead of a badge stack.
-- KB sources as small chips, not big cards.
-- Tickets as a single 1-row card.
-- Escalation as a one-line row, no siren.
+- **Phishing / credential prompts** → never click. Hand off to
+  *Karl Eek · Security on-call*.
+- **P1/P2 incidents** (multi-user pattern, auth/login subsystem down)
+  → never try to resolve from chat. Flag, page on-call.
+- **No credential collection.** Never asks for passwords, tokens, MFA.
+- **Don't invent KB articles or runbook URLs.** When unsure, say so
+  and offer to open a ticket.
 
-No dashboards, no SLO views, no model/policy admin, no risk register. Those live elsewhere — this is the surface a regular employee sees.
+Tested live with `qwen3.5:4b`, four canonical flows pass:
 
-## Design direction
-See `docs/spec.md` for the current chat-only mockup rationale and its limits as demo evidence.
+| Prompt | Expected behaviour |
+|---|---|
+| "Hi, I'm locked out. Need to reset my password." | Direct answer, references NordID portal, offers Identity-team ticket. |
+| "Hej, jag är låst ute. Hur återställer jag lösenordet?" | Same, in Swedish. |
+| "NordTrack won't let me in. Two colleagues say the same." | Flags as P1/P2 incident, pages on-call, tells user not to retry. |
+| "Got an email asking me to verify my password — should I click?" | Refuses to evaluate, pages Karl Eek (Security on-call). |
 
 ## Folder structure
 
 ```
 src/
-├── App.tsx                 — single-view router
+├── App.tsx
 ├── main.tsx
-├── index.css               — Tailwind v4 + @theme tokens (dark, midnight base, sage accent)
+├── index.css                — tokens, ambient gradient, motion utilities
 ├── lib/
 │   ├── types.ts
-│   ├── mock-data.ts        — three scripted case flows
-│   └── utils.ts
+│   ├── mock-data.ts         — `me` employee + 6 starter prompts
+│   ├── chat-store.ts        — localStorage chats + active id + model
+│   ├── utils.ts
+│   └── ollama/
+│       ├── adapter.ts       — health() / listModels() / chat() (streaming)
+│       └── prompt.ts        — system prompt + buildMessages() w/ language pin
+├── hooks/
+│   └── useNordIQAgent.ts    — adapter + store + state orchestrator
 ├── components/
-│   ├── AgentOrb.tsx        — pulsing presence visual
+│   ├── AgentOrb.tsx         — pulsing presence visual
 │   ├── Composer.tsx
-│   ├── ui/                 — Button, Card, Badge, Sheet, Tabs, Tooltip, Input, Separator
+│   ├── HistoryRail.tsx      — left rail: + New / Recent / Suggestions / model status
+│   ├── ModelStatusPill.tsx
+│   ├── ui/                  — Button, Card, Badge, Sheet, Tabs, Tooltip, Input, Separator
 │   └── chat/
 │       ├── AgentMessage.tsx
-│       ├── KBLinkCard.tsx
-│       ├── FollowUpCard.tsx
-│       ├── TicketDraftCard.tsx
-│       └── EscalationBanner.tsx
+│       ├── KBLinkCard.tsx       (waiting for Phase 2)
+│       ├── FollowUpCard.tsx     (waiting for Phase 2)
+│       ├── TicketDraftCard.tsx  (waiting for Phase 2)
+│       └── EscalationBanner.tsx (waiting for Phase 2)
 └── views/
-    └── ChatView.tsx        — hero state + chat state
+    └── ChatView.tsx
 ```
+
+## Roadmap
+
+- **Phase 2 (next):** structured `<NORDIQ classification="…" route="…" />`
+  tags in the model output, parsed out of the stream and rendered as
+  inline ticket cards / escalation banners / follow-up lists. The
+  components are already on disk waiting.
+- **Phase 3:** settings popover with a model picker fed by
+  `/api/tags`, plus a "clear history" button.

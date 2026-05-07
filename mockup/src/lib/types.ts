@@ -41,10 +41,3 @@ export interface ChatMessage {
   classification?: DecisionType;
   attachments?: ChatAttachment[];
 }
-
-export interface CaseFlow {
-  id: string;
-  prompt: string;          // shown as a quick-action chip and used as first user message
-  shortLabel: string;      // chip label
-  steps: ChatMessage[];
-}
