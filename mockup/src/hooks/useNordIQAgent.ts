@@ -65,6 +65,16 @@ export function useNordIQAgent() {
   }, []);
 
   // -------------------------------------------------------------------
+  // Prewarm — load the model into memory at app mount so the user's
+  // first real question doesn't pay the 10–15 s cold-start tax.
+  // Best-effort, fire-and-forget.
+  // -------------------------------------------------------------------
+  useEffect(() => {
+    void ollama.preload(state.model, "30m");
+    // Re-warm if the model preference changes mid-session.
+  }, [state.model]);
+
+  // -------------------------------------------------------------------
   // Persist on every meaningful change.
   // -------------------------------------------------------------------
   const persist = useCallback(
@@ -146,6 +156,7 @@ export function useNordIQAgent() {
           model: state.model,
           messages: buildMessages(priorMessages, trimmed),
           signal: abortRef.current.signal,
+          keepAlive: "30m",
         });
 
         for await (const piece of stream) {

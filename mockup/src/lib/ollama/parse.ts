@@ -38,19 +38,25 @@ interface ParsedTag {
 // extract — pure function over the running buffer.
 // Always returns the visible prefix safe to render. Once the tag is
 // closed, returns the parsed object too.
+//
+// Robust against the model sometimes splitting the tag across stream
+// chunks (e.g. "<NO" then "RDIQ classification=" then ".../>"). We
+// take the LAST complete tag in the buffer in case the model emits
+// more than one — only the final one matters.
 // ---------------------------------------------------------------------
 export function extract(buf: string): ExtractResult {
-  const start = buf.indexOf(TAG_OPEN);
-  if (start < 0) {
+  const lastStart = buf.lastIndexOf(TAG_OPEN);
+  if (lastStart < 0) {
     return { visible: trimTrailingTagPrefix(buf), tag: null, tagInFlight: false };
   }
-  const end = buf.indexOf(TAG_CLOSE, start);
-  const visible = buf.slice(0, start).replace(/\s+$/, "");
+  const end = buf.indexOf(TAG_CLOSE, lastStart);
+  const visible = buf.slice(0, lastStart).replace(/\s+$/, "");
   if (end < 0) {
-    // Tag opened but not yet closed.
+    // Last tag is still in flight — hide it but return any prior tag
+    // we may have parsed already (rare path: model emitted two).
     return { visible, tag: null, tagInFlight: true };
   }
-  const raw = buf.slice(start, end + TAG_CLOSE.length);
+  const raw = buf.slice(lastStart, end + TAG_CLOSE.length);
   return { visible, tag: parseTag(raw), tagInFlight: false };
 }
 

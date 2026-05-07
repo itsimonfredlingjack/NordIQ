@@ -27,6 +27,10 @@ export interface ChatOptions {
   model: string;
   messages: OllamaMessage[];
   signal?: AbortSignal;
+  /** Lifecycle setting — how long Ollama keeps the model resident
+   * after the request. "30m" prevents the 5-min idle unload cliff
+   * during a demo; "-1" pins indefinitely. */
+  keepAlive?: string | number;
   // forwarded to Ollama: temperature, top_p, num_predict, …
   options?: Record<string, number | string | boolean>;
 }
@@ -71,6 +75,34 @@ export async function listModels(): Promise<OllamaModelInfo[]> {
 }
 
 // ---------------------------------------------------------------------
+// preload() — empty /api/chat to warm the model into RAM.
+// Per Ollama docs, an empty messages array with keep_alive set causes
+// the runtime to load the model and hold it. Cuts the 10–15 s
+// first-token cold-start that we otherwise hit on the user's first
+// real question.
+// ---------------------------------------------------------------------
+export async function preload(
+  model: string,
+  keepAlive: string | number = "30m",
+): Promise<void> {
+  try {
+    await fetch(`${BASE}/api/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [],
+        stream: false,
+        keep_alive: keepAlive,
+      }),
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch {
+    // Best-effort. The next chat() call will surface real errors.
+  }
+}
+
+// ---------------------------------------------------------------------
 // chat() — streaming. Yields token chunks (plain strings) as they arrive.
 //
 // Ollama's /api/chat with stream:true returns NDJSON — one JSON object
@@ -81,6 +113,7 @@ export async function* chat({
   model,
   messages,
   signal,
+  keepAlive = "30m",
   options,
 }: ChatOptions): AsyncIterable<string> {
   const r = await fetch(`${BASE}/api/chat`, {
@@ -91,12 +124,15 @@ export async function* chat({
       model,
       messages,
       stream: true,
-      // qwen3.5 ships with thinking on by default — that's a long
-      // pre-token phase that makes streaming look frozen. Off for
-      // service-desk turns; we want immediate replies.
+      // Both Gemma 4 and Qwen 3.5 ship with thinking on by default —
+      // that's a long pre-token phase that makes streaming look frozen.
+      // Off for service-desk turns; we want immediate replies.
       think: false,
+      keep_alive: keepAlive,
+      // Sampling params that aren't part of nordiq:1's Modelfile defaults
+      // can still override here. nordiq:1 already pins num_ctx,
+      // temperature, top_k, top_p, repeat_penalty, num_predict.
       options: {
-        temperature: 0.4,
         ...options,
       },
     }),
