@@ -24,13 +24,18 @@ export function HistoryRail({
 }) {
   return (
     <aside className="hidden w-[228px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-2)]/40 md:flex">
-      {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 pt-5 pb-3">
+      {/* Brand — clickable, doubles as home */}
+      <button
+        type="button"
+        onClick={onNewChat}
+        title="Home — start a new chat"
+        className="flex items-center gap-2.5 px-5 pt-5 pb-3 text-left transition-opacity hover:opacity-80 focus-ring rounded-lg"
+      >
         <AgentOrb size={22} />
         <span className="font-display text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
           NordIQ
         </span>
-      </div>
+      </button>
 
       {/* New chat */}
       <div className="px-3 pb-3">
