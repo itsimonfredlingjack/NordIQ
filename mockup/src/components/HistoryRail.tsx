@@ -24,18 +24,28 @@ export function HistoryRail({
 }) {
   return (
     <aside className="hidden w-[228px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-2)]/40 md:flex">
-      {/* Brand — clickable, doubles as home */}
-      <button
-        type="button"
-        onClick={onNewChat}
-        title="Home — start a new chat"
-        className="flex items-center gap-2.5 px-5 pt-5 pb-3 text-left transition-opacity hover:opacity-80 focus-ring rounded-lg"
-      >
-        <AgentOrb size={22} />
-        <span className="font-display text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
-          NordIQ
-        </span>
-      </button>
+      {/* Brand — clickable, doubles as home. Looks like a pill-button so
+          users read "this is interactive" before they read "this is a logo". */}
+      <div className="px-3 pt-4 pb-3">
+        <button
+          type="button"
+          onClick={onNewChat}
+          title="Home"
+          className="group flex w-full items-center gap-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 px-3 py-2 text-left transition-all hover:border-[var(--color-border-2)] hover:bg-[var(--color-surface)] focus-ring"
+        >
+          <span className="transition-transform duration-200 group-hover:scale-110">
+            <AgentOrb size={26} />
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--color-fg)]">
+              NordIQ
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.14em] text-[var(--color-fg-subtle)] transition-colors group-hover:text-[var(--color-accent)]">
+              Home
+            </span>
+          </span>
+        </button>
+      </div>
 
       {/* New chat */}
       <div className="px-3 pb-3">
