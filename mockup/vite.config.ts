@@ -16,7 +16,20 @@ export default defineConfig({
     open: false,
     proxy: {
       // Proxy NordIQ → local Ollama. Avoids CORS during dev.
-      // Production builds need OLLAMA_ORIGINS=* on the Ollama side.
+      "/ollama": {
+        target: "http://localhost:11434",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/ollama/, ""),
+      },
+    },
+  },
+  // `vite preview` has its own config block — it does NOT inherit
+  // server.proxy. Without this, the production build can't reach
+  // Ollama and the page hangs the browser as preload retries forever.
+  preview: {
+    port: 4173,
+    strictPort: false,
+    proxy: {
       "/ollama": {
         target: "http://localhost:11434",
         changeOrigin: true,
