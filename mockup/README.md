@@ -63,7 +63,8 @@ Reload the page. A model picker UI is planned for later.
 ```bash
 cd mockup
 npm install
-npm run dev          # http://localhost:5173 (or next free port)
+npm run dev
+# Vite picks 5173 by default, or the next free port if taken.
 npm run typecheck
 ```
 
@@ -73,11 +74,18 @@ there's no CORS dance.
 ### Production preview
 
 ```bash
-npm run build && npm run preview      # http://localhost:4173
+npm run build
+npm run preview
 ```
 
-The same `/ollama` proxy is configured for preview mode, so you don't
-need `OLLAMA_ORIGINS=*` on the Ollama side.
+Preview serves on `http://localhost:4173/` by default. The same
+`/ollama` proxy is configured for preview mode, so you don't need
+`OLLAMA_ORIGINS=*` on the Ollama side.
+
+> **Don't paste the URL as a comment after the command.** Trailing
+> `# http://...` ends up as an argv to `vite preview` and produces
+> a noisy "project root contains #" warning. The server still runs;
+> the warning is cosmetic.
 
 > **Watch out for resource pressure.** On a 16 GB Mac, running
 > `npm run dev` AND `npm run preview` at the same time AND keeping
