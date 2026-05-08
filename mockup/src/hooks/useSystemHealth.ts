@@ -72,8 +72,8 @@ export function useSystemHealth(model: string) {
           s.id === "model"
             ? {
                 ...s,
-                detail: model,
-                subDetail: details.base ? `via ${details.base}` : undefined,
+                detail: details.base ? `${model} (${details.base})` : model,
+                subDetail: undefined,
               }
             : s,
         ),
