@@ -71,6 +71,56 @@ export async function health(): Promise<{
 }
 
 // ---------------------------------------------------------------------
+// getModelDetails() — /api/show for one model.
+// Used to surface the underlying base model ("nordiq:1 via gemma4:e2b")
+// in the System Health panel so the demo audience sees what's
+// actually running.
+// ---------------------------------------------------------------------
+export interface ModelDetails {
+  name: string;
+  base: string | null;
+  family: string | null;
+  parameterSize: string | null;
+}
+
+export async function getModelDetails(name: string): Promise<ModelDetails> {
+  try {
+    const r = await fetch(`${BASE}/api/show`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name }),
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!r.ok) return { name, base: null, family: null, parameterSize: null };
+    const json = (await r.json()) as {
+      modelfile?: string;
+      details?: {
+        parent_model?: string;
+        family?: string;
+        parameter_size?: string;
+      };
+    };
+    // For derived models, Ollama's `/api/show` puts the base in
+    // `details.parent_model` — that's the human-readable name like
+    // "gemma4:e2b". The "FROM" line in `modelfile` is rewritten into
+    // a blob-path on disk, so we don't try to parse that.
+    const fromMatch = json.modelfile?.match(/^FROM\s+(\S+)/m)?.[1];
+    const base =
+      json.details?.parent_model ||
+      (fromMatch && !fromMatch.includes("/blobs/") ? fromMatch : null) ||
+      null;
+    return {
+      name,
+      base: base && base !== name ? base : null,
+      family: json.details?.family ?? null,
+      parameterSize: json.details?.parameter_size ?? null,
+    };
+  } catch {
+    return { name, base: null, family: null, parameterSize: null };
+  }
+}
+
+// ---------------------------------------------------------------------
 // listModels() — for the picker.
 // ---------------------------------------------------------------------
 export async function listModels(): Promise<OllamaModelInfo[]> {

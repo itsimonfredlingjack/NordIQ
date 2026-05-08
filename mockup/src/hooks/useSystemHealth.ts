@@ -55,21 +55,36 @@ export function useSystemHealth(model: string) {
     },
   ]);
 
-  // Real model ping every 30s.
+  // Real model ping every 30s + look up the underlying base model
+  // once per model change so the demo can show "nordiq:1 · gemma4:e2b".
   useEffect(() => {
     let cancelled = false;
+
+    const lookupBase = async () => {
+      const details = await ollama.getModelDetails(model);
+      if (cancelled) return;
+      const detail = details.base
+        ? `${model} · ${details.base}`
+        : model;
+      setServices((prev) =>
+        prev.map((s) => (s.id === "model" ? { ...s, detail } : s)),
+      );
+    };
+
     const ping = async () => {
       const h = await ollama.health();
       if (cancelled) return;
       setServices((prev) =>
         prev.map((s) =>
           s.id === "model"
-            ? { ...s, detail: model, status: h.reachable ? "operational" : "down" }
+            ? { ...s, status: h.reachable ? "operational" : "down" }
             : s,
         ),
       );
     };
-    ping();
+
+    void lookupBase();
+    void ping();
     const id = window.setInterval(ping, 30_000);
     return () => {
       cancelled = true;
