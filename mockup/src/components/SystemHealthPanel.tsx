@@ -47,6 +47,11 @@ export function SystemHealthPanel({
                 <span className="truncate font-mono text-[10.5px] text-[var(--color-fg)]">
                   {s.detail}
                 </span>
+                {s.subDetail && (
+                  <span className="truncate font-mono text-[9.5px] text-[var(--color-fg-subtle)]">
+                    {s.subDetail}
+                  </span>
+                )}
               </div>
             </div>
             <span

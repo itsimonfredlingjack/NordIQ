@@ -18,6 +18,10 @@ export interface ServiceHealth {
   id: "model" | "hosting" | "llm";
   label: string;
   detail: string;
+  /** Optional secondary line — used to surface the underlying base
+   * model (e.g. "via gemma4:e2b") in a quieter style than the primary
+   * name. */
+  subDetail?: string;
   status: Health;
   note?: string;
 }
@@ -63,11 +67,16 @@ export function useSystemHealth(model: string) {
     const lookupBase = async () => {
       const details = await ollama.getModelDetails(model);
       if (cancelled) return;
-      const detail = details.base
-        ? `${model} · ${details.base}`
-        : model;
       setServices((prev) =>
-        prev.map((s) => (s.id === "model" ? { ...s, detail } : s)),
+        prev.map((s) =>
+          s.id === "model"
+            ? {
+                ...s,
+                detail: model,
+                subDetail: details.base ? `via ${details.base}` : undefined,
+              }
+            : s,
+        ),
       );
     };
 
