@@ -68,7 +68,7 @@ Reload the page. A model picker UI is planned for later.
 ## Run the app
 
 ```bash
-cd mockup
+cd app
 npm install
 npm run dev
 # Vite picks 5173 by default, or the next free port if taken.

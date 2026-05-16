@@ -109,7 +109,7 @@ Paketet ska besvara tre frågor inför CAB:
 
 | Mapp | Beskrivning |
 |------|-------------|
-| [mockup/](mockup/) | Klickbar single-screen-mockup av medarbetar-yta för NordIQ - Vite + React + TS. Tre auto-spelade scenarier: lösenordsåterställning, konsult-onboarding, NordTrack-incident. Kör med `cd mockup && npm install && npm run dev`. |
+| [app/](app/) | Live NordIQ-mockup mot lokal Ollama (`nordiq:2` på `gemma4:e2b`). Default-vy är Shadow Replay (CAB-facing) — 12 representativa first-line-ärenden klassificeras live, med cluster-detection för multi-user-incidenter. "Open employee view" visar Lina-onboarding-flödet (KB-RAG, vision, IT-intake packet). Kör med `cd app && npm install && npm run dev`. |
 
 ---
 
