@@ -10,7 +10,7 @@ const KEY_CHATS = "nordiq:chats";
 const KEY_ACTIVE = "nordiq:active";
 const KEY_MODEL = "nordiq:model";
 
-const DEFAULT_MODEL = "nordiq:1";
+const DEFAULT_MODEL = "nordiq:2";
 const MAX_CHATS = 8;
 
 export interface StoredChat {

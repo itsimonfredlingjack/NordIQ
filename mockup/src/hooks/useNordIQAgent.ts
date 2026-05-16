@@ -10,7 +10,9 @@ import * as ollama from "@/lib/ollama/adapter";
 import { buildMessages } from "@/lib/ollama/prompt";
 import { extract, tagToAttachments } from "@/lib/ollama/parse";
 import * as store from "@/lib/chat-store";
-import type { ChatMessage } from "@/lib/types";
+import type { ChatAttachment, ChatMessage } from "@/lib/types";
+import type { ServiceRequestPacket } from "@/lib/intake/types";
+import type { ParsedTag } from "@/lib/ollama/parse";
 
 type Mode = "hero" | "playing";
 
@@ -104,9 +106,10 @@ export function useNordIQAgent() {
   // send() — main entry. Append user msg, stream agent reply, persist.
   // -------------------------------------------------------------------
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, images?: string[]) => {
       const trimmed = text.trim();
-      if (!trimmed) return;
+      // Allow image-only turns (no text), but require something.
+      if (!trimmed && (!images || images.length === 0)) return;
       // Cancel any in-flight stream.
       abortRef.current?.abort();
       abortRef.current = new AbortController();
@@ -116,6 +119,7 @@ export function useNordIQAgent() {
         author: "user",
         content: trimmed,
         timestamp: new Date().toISOString(),
+        ...(images && images.length > 0 ? { images } : {}),
       };
 
       const agentId = `a-${Date.now() + 1}`;
@@ -160,7 +164,7 @@ export function useNordIQAgent() {
         let firstToken = true;
         const stream = ollama.chat({
           model: state.model,
-          messages: buildMessages(priorMessages, trimmed),
+          messages: buildMessages(priorMessages, trimmed, images),
           signal: abortRef.current.signal,
           keepAlive: "30m",
           onComplete: (meta) =>
@@ -173,7 +177,7 @@ export function useNordIQAgent() {
             firstToken = false;
             setState((s) => ({ ...s, thinking: false }));
           }
-          const { visible, tag } = extract(buf);
+          const { visible, tag, packet } = extract(buf);
           // Update the placeholder live. Hide tag fragment from view.
           setState((s) => ({
             ...s,
@@ -184,7 +188,7 @@ export function useNordIQAgent() {
                     content: visible,
                     classification: tag?.classification ?? m.classification,
                     confidence: tag?.confidence ?? m.confidence,
-                    attachments: tag ? tagToAttachments(tag) : m.attachments,
+                    attachments: mergeAttachments(tag, packet, m.attachments),
                   }
                 : m,
             ),
@@ -192,19 +196,28 @@ export function useNordIQAgent() {
         }
 
         // Final pass — make sure we've extracted the tag even if it
-        // landed in the very last chunk.
-        const final = extract(buf);
+        // landed in the very last chunk. Pass `final: true` so the
+        // packet parser repairs any unclosed JSON the model dropped
+        // when it hit its stop token mid-emit.
+        const final = extract(buf, true);
+        // If the model emitted a packet but no tag, synthesise a
+        // ticket-created classification so the UI + telemetry stay
+        // sensible. The packet itself is the primary artifact.
+        const effectiveTag =
+          final.tag ?? (final.packet ? classifyForPacket() : null);
         setState((s) => {
           const updated = s.messages.map((m) =>
             m.id === agentId
               ? {
                   ...m,
                   content: final.visible,
-                  classification: final.tag?.classification ?? m.classification,
-                  confidence: final.tag?.confidence ?? m.confidence,
-                  attachments: final.tag
-                    ? tagToAttachments(final.tag)
-                    : m.attachments,
+                  classification: effectiveTag?.classification ?? m.classification,
+                  confidence: effectiveTag?.confidence ?? m.confidence,
+                  attachments: mergeAttachments(
+                    effectiveTag,
+                    final.packet,
+                    m.attachments,
+                  ),
                 }
               : m,
           );
@@ -214,7 +227,9 @@ export function useNordIQAgent() {
             messages: updated,
             streaming: false,
             thinking: false,
-            lastTagValid: final.tag !== null,
+            // Treat a recovered packet as a valid turn even if the
+            // final NORDIQ tag was dropped.
+            lastTagValid: final.tag !== null || final.packet !== null,
           };
         });
       } catch (e) {
@@ -309,13 +324,43 @@ export function useNordIQAgent() {
   };
 }
 
+// Combine tag-derived and packet-derived attachments, preserving any
+// existing attachments if neither stream produced new ones.
+//
+// If the model emitted a packet but stopped before the final <NORDIQ />
+// tag (a known gemma4:e2b failure mode), we don't want to lose the
+// packet OR break downstream UI that expects a classification — the
+// agent message should still render with a "ticket-created" stripe.
+// The route/reason on a synthesised tag come from the packet itself.
+function mergeAttachments(
+  tag: ParsedTag | null,
+  packet: ServiceRequestPacket | null,
+  existing: ChatAttachment[] | undefined,
+): ChatAttachment[] | undefined {
+  const out: ChatAttachment[] = [];
+  if (tag) out.push(...tagToAttachments(tag));
+  if (packet) out.push({ kind: "packet", packet });
+  if (out.length === 0) return existing;
+  return out;
+}
+
+// Derive a synthetic classification when the packet is present but
+// the model dropped the final tag. Keeps the agent stripe + telemetry
+// honest (the orchestration round did finish a ticket-creation).
+function classifyForPacket(): ParsedTag {
+  return {
+    classification: "ticket-created",
+    confidence: "high",
+  };
+}
+
 function friendlyError(raw: string): string {
   const lower = raw.toLowerCase();
   if (lower.includes("failed to fetch") || lower.includes("networkerror")) {
     return "Can't reach the local model. Make sure Ollama is running (try `ollama serve` in a terminal).";
   }
   if (lower.includes("model") && lower.includes("not found")) {
-    return `Model not found. Run \`ollama pull qwen3.5:4b\` and try again.`;
+    return `Model not found. Build it with \`ollama create nordiq:2 -f Modelfile.nordiq2\` and try again.`;
   }
   if (lower.includes("aborted")) {
     return "Stopped.";

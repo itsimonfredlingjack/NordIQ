@@ -9,13 +9,18 @@
 // =====================================================================
 
 import type { ChatAttachment, DecisionType } from "../types";
+import type { ServiceRequestPacket } from "../intake/types";
 
 const TAG_OPEN = "<NORDIQ";
 const TAG_CLOSE = "/>";
+const PACKET_OPEN = "<NORDIQ_PACKET>";
+const PACKET_CLOSE = "</NORDIQ_PACKET>";
 
 interface ExtractResult {
   visible: string;
   tag: ParsedTag | null;
+  /** Parsed IT-intake packet, if the model emitted one in this turn. */
+  packet: ServiceRequestPacket | null;
   /** True if the model has started writing the tag (so we know not to
    * render the partial fragment yet). */
   tagInFlight: boolean;
@@ -44,20 +49,262 @@ interface ParsedTag {
 // take the LAST complete tag in the buffer in case the model emits
 // more than one — only the final one matters.
 // ---------------------------------------------------------------------
-export function extract(buf: string): ExtractResult {
-  const lastStart = buf.lastIndexOf(TAG_OPEN);
+export function extract(buf: string, final = false): ExtractResult {
+  // Strip out a <NORDIQ_PACKET>...</NORDIQ_PACKET> block first, parse
+  // it, and remove it from the buffer used for visible text + tag
+  // extraction. The model frequently drops the close tag and stops
+  // mid-JSON, so we have several fallbacks.
+  let workBuf = buf;
+  let packet: ServiceRequestPacket | null = null;
+
+  const packetStart = workBuf.indexOf(PACKET_OPEN);
+  if (packetStart >= 0) {
+    const packetEnd = workBuf.indexOf(PACKET_CLOSE, packetStart);
+    if (packetEnd >= 0) {
+      const json = workBuf
+        .slice(packetStart + PACKET_OPEN.length, packetEnd)
+        .trim();
+      packet = parsePacket(json);
+      workBuf =
+        workBuf.slice(0, packetStart) +
+        workBuf.slice(packetEnd + PACKET_CLOSE.length);
+    } else {
+      // No close tag yet. Three cases:
+      //   (a) Final <NORDIQ /> tag appears after the packet open — the
+      //       model dropped </NORDIQ_PACKET>. Treat the position of
+      //       <NORDIQ as the de-facto close.
+      //   (b) `final` pass with neither close nor final tag — the model
+      //       stopped mid-JSON. Try to repair-parse what we have.
+      //   (c) Truly in-flight (streaming) — hide from PACKET_OPEN.
+      // Search for the final <NORDIQ /> tag *after* the PACKET_OPEN
+       // string itself — otherwise we'd match the leading "<NORDIQ" of
+       // <NORDIQ_PACKET> and treat the empty body as the JSON.
+      const fallbackClose = workBuf.indexOf(
+        TAG_OPEN,
+        packetStart + PACKET_OPEN.length,
+      );
+      if (fallbackClose >= 0) {
+        const json = workBuf
+          .slice(packetStart + PACKET_OPEN.length, fallbackClose)
+          .trim();
+        packet = parsePacket(json);
+        workBuf =
+          workBuf.slice(0, packetStart) + workBuf.slice(fallbackClose);
+      } else if (final) {
+        const json = workBuf.slice(packetStart + PACKET_OPEN.length).trim();
+        packet = parsePacket(json);
+        workBuf = workBuf.slice(0, packetStart);
+      } else {
+        workBuf = workBuf.slice(0, packetStart);
+      }
+    }
+  }
+
+  const lastStart = workBuf.lastIndexOf(TAG_OPEN);
   if (lastStart < 0) {
-    return { visible: trimTrailingTagPrefix(buf), tag: null, tagInFlight: false };
+    return {
+      visible: trimTrailingTagPrefix(workBuf),
+      tag: null,
+      packet,
+      tagInFlight: false,
+    };
   }
-  const end = buf.indexOf(TAG_CLOSE, lastStart);
-  const visible = buf.slice(0, lastStart).replace(/\s+$/, "");
+  const end = workBuf.indexOf(TAG_CLOSE, lastStart);
+  const visible = workBuf.slice(0, lastStart).replace(/\s+$/, "");
   if (end < 0) {
-    // Last tag is still in flight — hide it but return any prior tag
-    // we may have parsed already (rare path: model emitted two).
-    return { visible, tag: null, tagInFlight: true };
+    return { visible, tag: null, packet, tagInFlight: true };
   }
-  const raw = buf.slice(lastStart, end + TAG_CLOSE.length);
-  return { visible, tag: parseTag(raw), tagInFlight: false };
+  const raw = workBuf.slice(lastStart, end + TAG_CLOSE.length);
+  return { visible, tag: parseTag(raw), packet, tagInFlight: false };
+}
+
+// ---------------------------------------------------------------------
+// parsePacket — strict JSON.parse with a shape validation pass. If
+// the model produced something unparseable, we silently drop the
+// packet rather than crash; the agent's prose still renders.
+// ---------------------------------------------------------------------
+function parsePacket(raw: string): ServiceRequestPacket | null {
+  try {
+    // Some models wrap JSON in ```json fences. Strip them defensively.
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
+    // gemma4:e2b sometimes hits stop mid-JSON — leaving unclosed
+    // arrays/objects. Try a strict parse first; fall back to a
+    // balance-the-braces repair pass.
+    const parsed = tryParseOrRepair(cleaned);
+    if (!parsed || typeof parsed !== "object") return null;
+    const obj = parsed as Record<string, unknown>;
+    if (
+      !obj ||
+      typeof obj !== "object" ||
+      typeof obj.subject !== "string" ||
+      !Array.isArray(obj.requests)
+    ) {
+      return null;
+    }
+    return {
+      id: typeof obj.id === "string" ? obj.id : `PKT-${Date.now()}`,
+      subject: obj.subject,
+      createdAt:
+        typeof obj.createdAt === "string"
+          ? obj.createdAt
+          : new Date().toISOString(),
+      intent: typeof obj.intent === "string" ? obj.intent : "",
+      requests: (obj.requests as unknown[])
+        .filter(
+          (r): r is Record<string, unknown> =>
+            typeof r === "object" && r !== null,
+        )
+        .map((r: Record<string, unknown>, i: number) => ({
+          id: typeof r.id === "string" ? r.id : `REQ-${i}`,
+          title: typeof r.title === "string" ? r.title : "Untitled request",
+          service: typeof r.service === "string" ? r.service : "—",
+          routedTo:
+            typeof r.routedTo === "string" ? r.routedTo : "IT Ops on-call",
+          body: typeof r.body === "string" ? r.body : "",
+          approvers: Array.isArray(r.approvers)
+            ? (r.approvers as unknown[]).filter(
+                (x): x is string => typeof x === "string",
+              )
+            : [],
+          status: normalizeStatus(r.status),
+        })),
+      missing: Array.isArray(obj.missing)
+        ? (obj.missing as unknown[])
+            .filter(
+              (m): m is Record<string, unknown> =>
+                typeof m === "object" && m !== null,
+            )
+            .map((m: Record<string, unknown>) => ({
+              field: typeof m.field === "string" ? m.field : "",
+              why: typeof m.why === "string" ? m.why : "",
+            }))
+            .filter((m) => m.field)
+        : [],
+      risks: Array.isArray(obj.risks)
+        ? (obj.risks as unknown[])
+            .filter(
+              (r): r is Record<string, unknown> =>
+                typeof r === "object" && r !== null,
+            )
+            .map((r: Record<string, unknown>) => ({
+              label: typeof r.label === "string" ? r.label : "",
+              detail: typeof r.detail === "string" ? r.detail : "",
+              severity:
+                r.severity === "block" || r.severity === "warn"
+                  ? r.severity
+                  : "info",
+            }))
+            .filter((r) => r.label)
+        : [],
+      readyToSubmit:
+        typeof obj.readyToSubmit === "boolean" ? obj.readyToSubmit : false,
+    } as ServiceRequestPacket;
+  } catch {
+    return null;
+  }
+}
+
+// Try strict JSON.parse, then a forgiving repair pass for the common
+// "model stopped mid-emit" failure modes:
+//   - trailing comma before } or ]
+//   - unclosed arrays/objects (count brackets, append missing closers)
+//   - dangling field with `"key":` and no value
+function tryParseOrRepair(raw: string): unknown | null {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // fall through
+  }
+
+  // Walk the input character-by-character, tracking quote/escape and
+  // bracket depth. Stop at the index where the depth returns to 0
+  // for the FIRST top-level object — that's the model's intended JSON.
+  // Anything after that (extra commas, trailing braces, partial second
+  // object) is discarded.
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  let firstClose = -1;
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (c === "\\") {
+      escape = true;
+      continue;
+    }
+    if (c === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (c === "{" || c === "[") depth++;
+    else if (c === "}" || c === "]") {
+      depth--;
+      if (depth === 0) {
+        firstClose = i;
+        break;
+      }
+    }
+  }
+  if (firstClose >= 0) {
+    try {
+      return JSON.parse(raw.slice(0, firstClose + 1));
+    } catch {
+      // fall through to balance pass
+    }
+  }
+
+  // Balance-the-brackets repair for truly truncated JSON.
+  let s = raw.trim();
+  s = s.replace(/,\s*"[^"]*"\s*:\s*$/, "");
+  s = s.replace(/"[^"]*"\s*:\s*$/, "");
+  s = s.replace(/,\s*$/, "");
+  s = s.replace(/,(\s*[}\]])/g, "$1");
+  const opens: string[] = [];
+  inString = false;
+  escape = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (c === "\\") {
+      escape = true;
+      continue;
+    }
+    if (c === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (c === "{" || c === "[") opens.push(c);
+    else if (c === "}" || c === "]") opens.pop();
+  }
+  if (inString) s += '"';
+  s = s.replace(/,\s*$/, "");
+  while (opens.length > 0) {
+    const o = opens.pop();
+    s += o === "{" ? "}" : "]";
+  }
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
+
+function normalizeStatus(s: unknown): ServiceRequestPacket["requests"][number]["status"] {
+  if (s === "ready" || s === "needs_input" || s === "needs_approval" || s === "blocked") {
+    return s;
+  }
+  return "needs_input";
 }
 
 // ---------------------------------------------------------------------

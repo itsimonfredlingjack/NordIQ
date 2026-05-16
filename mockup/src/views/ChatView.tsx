@@ -29,11 +29,11 @@ export function ChatView() {
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [agent.messages, agent.thinking]);
 
-  const handleSend = () => {
+  const handleSend = (images?: string[]) => {
     const text = composerValue.trim();
-    if (!text) return;
+    if (!text && (!images || images.length === 0)) return;
     setComposerValue("");
-    void agent.send(text);
+    void agent.send(text, images);
   };
 
   const handleSuggestion = (prompt: string) => {
@@ -87,7 +87,7 @@ export function ChatView() {
                   Hi, {me.name.split(" ")[0]}.
                   <br />
                   <span className="text-[var(--color-fg-muted)]">
-                    What do you need today?
+                    Who's joining NordTech?
                   </span>
                 </h1>
               </div>
@@ -98,7 +98,7 @@ export function ChatView() {
                   onChange={setComposerValue}
                   onSubmit={handleSend}
                   size="lg"
-                  placeholder="Ask NordIQ — passwords, access, devices, anything"
+                  placeholder="Paste an email, drop a contract, or describe who's starting"
                   disabled={agent.streaming}
                 />
               </div>
@@ -115,6 +115,7 @@ export function ChatView() {
                   </button>
                 ))}
               </div>
+
             </div>
           </main>
         ) : (

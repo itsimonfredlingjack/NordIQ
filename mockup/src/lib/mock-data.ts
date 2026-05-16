@@ -1,14 +1,15 @@
 import type { Employee } from "./types";
 
 export const me: Employee = {
-  name: "Anna Berg",
-  initials: "AB",
-  role: "IT Operations",
+  name: "Lina Nordin",
+  initials: "LN",
+  role: "Head of HR",
   department: "NordTech AB",
 };
 
-// Starter prompts surfaced as chips in the rail. The model answers
-// them live — there are no scripted steps anymore.
+// Starter prompts surfaced as chips in the rail. Narrowed to onboarding
+// scenarios — the focus of the demo. Other use-cases (VPN, password,
+// phishing) still work via free-text input but aren't promoted.
 export interface StarterPrompt {
   id: string;
   shortLabel: string;
@@ -17,37 +18,21 @@ export interface StarterPrompt {
 
 export const caseFlows: StarterPrompt[] = [
   {
-    id: "password",
-    shortLabel: "Reset my password",
-    prompt: "Hi, I'm locked out. Need to reset my company password.",
-  },
-  {
-    id: "onboarding",
+    id: "consultant",
     shortLabel: "Onboard a consultant",
     prompt:
-      "A new consultant starts on Monday and needs a laptop and access to our systems.",
+      "Hassan Karim starts Monday as a junior consultant on a 6-month engagement. Sponsor is Erik Holm. Please set him up.",
   },
   {
-    id: "incident",
-    shortLabel: "Several can't log in",
+    id: "samesetup",
+    shortLabel: "Same setup as someone",
     prompt:
-      "NordTrack won't let me in. Two of my colleagues say the same. Login spins forever.",
+      "I have a new hire starting next Monday — same role and access as Hassan who joined in March.",
   },
   {
-    id: "vpn",
-    shortLabel: "VPN won't connect",
-    prompt: "VPN won't connect on my Mac. Worked fine yesterday.",
-  },
-  {
-    id: "phishing",
-    shortLabel: "Got a phishing email",
+    id: "offboard",
+    shortLabel: "Off-board someone",
     prompt:
-      "Got an email asking me to verify my password — looks suspicious. Should I click the link to check?",
-  },
-  {
-    id: "newhire",
-    shortLabel: "Onboard a new hire",
-    prompt:
-      "I have a new hire starting next Monday — same role as Hassan who joined in March. Can you set them up?",
+      "Sara Olsson's last day is Friday. Please plan her off-boarding — accounts, devices, access.",
   },
 ];

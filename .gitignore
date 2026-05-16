@@ -42,3 +42,7 @@ __pycache__/
 diagrams/*.svg
 diagrams/*.png
 diagrams/*.pdf
+
+# Claude session state + screenshot artifacts
+.claude/
+.playwright-mcp/

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { AgentOrb, type OrbTone } from "@/components/AgentOrb";
@@ -5,6 +6,11 @@ import { TicketDraftCard } from "./TicketDraftCard";
 import { EscalationBanner } from "./EscalationBanner";
 import { KBLinkCard } from "./KBLinkCard";
 import { FollowUpCard } from "./FollowUpCard";
+import { ServiceRequestPacketCard } from "@/components/intake/ServiceRequestPacketCard";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
 import { formatTime } from "@/lib/utils";
 import type { ChatMessage, DecisionType } from "@/lib/types";
 
@@ -39,18 +45,7 @@ export function AgentMessage({ msg }: { msg: ChatMessage }) {
   }
 
   if (msg.author === "user") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="flex justify-end"
-      >
-        <div className="max-w-[78%] rounded-[18px] bg-[var(--color-surface)] px-4 py-2.5 text-[14px] leading-relaxed text-[var(--color-fg)]">
-          {msg.content}
-        </div>
-      </motion.div>
-    );
+    return <UserBubble msg={msg} />;
   }
 
   // agent
@@ -112,9 +107,79 @@ export function AgentMessage({ msg }: { msg: ChatMessage }) {
                 reason={a.reason}
               />
             );
+          if (a.kind === "packet")
+            return <ServiceRequestPacketCard key={i} packet={a.packet} />;
           return null;
         })}
       </div>
+    </motion.div>
+  );
+}
+
+// ---------------------------------------------------------------------
+// UserBubble — separated so we can host the lightbox sheet's state
+// without re-rendering the agent branch unnecessarily.
+// ---------------------------------------------------------------------
+function UserBubble({ msg }: { msg: ChatMessage }) {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const images = msg.images ?? [];
+  const activeSrc =
+    openIdx !== null && images[openIdx]
+      ? `data:image/*;base64,${images[openIdx]}`
+      : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="flex justify-end"
+    >
+      <div className="flex max-w-[78%] flex-col items-end gap-1.5">
+        {images.length > 0 && (
+          <div className="flex flex-wrap justify-end gap-1.5">
+            {images.map((b64, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setOpenIdx(i)}
+                className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent-border)]"
+                aria-label={`Open attached image ${i + 1}`}
+              >
+                <img
+                  src={`data:image/*;base64,${b64}`}
+                  alt={`Attachment ${i + 1}`}
+                  className="block max-h-48 max-w-[180px] object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+        {msg.content && (
+          <div className="rounded-[18px] bg-[var(--color-surface)] px-4 py-2.5 text-[14px] leading-relaxed text-[var(--color-fg)]">
+            {msg.content}
+          </div>
+        )}
+      </div>
+
+      <Sheet
+        open={openIdx !== null}
+        onOpenChange={(o) => {
+          if (!o) setOpenIdx(null);
+        }}
+      >
+        <SheetContent side="right" className="bg-[var(--color-bg)]">
+          <div className="flex h-full items-center justify-center p-6">
+            {activeSrc && (
+              <img
+                src={activeSrc}
+                alt="Attachment full size"
+                className="max-h-full max-w-full rounded-md object-contain shadow-[var(--shadow-lg)]"
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </motion.div>
   );
 }

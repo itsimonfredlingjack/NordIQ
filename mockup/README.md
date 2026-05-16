@@ -14,26 +14,33 @@ wired to a **real local LLM via Ollama** — no scripted flows.
 ## Prerequisites — Ollama
 
 The chat surface talks to a local Ollama server on `:11434`. The
-default model is **`nordiq:1`** — a custom Modelfile-built variant of
-`gemma4:e2b` with the NordIQ persona, hard rules, vocabulary, and
-`<NORDIQ />` tag protocol baked into the system prompt.
+default model is **`nordiq:2`** — a custom Modelfile-built variant of
+`gemma4:e2b` with the NordIQ persona, hard rules, vocabulary,
+`<NORDIQ />` tag protocol, **vision rule** (Phase 4 — multimodal
+triage of attached screenshots) and **KB grounding rule** (only cite
+sources from the in-process KB) baked into the system prompt.
 
 ```bash
 # 1. Install Ollama: https://ollama.com/download
-# 2. Pull the base model (~7.2 GB)
+# 2. Pull the base model (~7.2 GB) — gemma4:e2b is multimodal
 ollama pull gemma4:e2b
 
-# 3. Build the NordIQ-tuned variant from the Modelfile in this repo
-ollama create nordiq:1 -f Modelfile
+# 3. Build the Phase 4 NordIQ variant
+ollama create nordiq:2 -f Modelfile.nordiq2
 
 # 4. Verify
 ollama list | grep nordiq
 curl http://localhost:11434/api/tags
 ```
 
-The `Modelfile` pins `num_ctx 4096`, low-temperature sampling for
-stable tag output, and bakes in the entire NordIQ system prompt.
-Rebuild any time you change the Modelfile.
+The `Modelfile.nordiq2` pins `num_ctx 4096`, low-temperature sampling
+for stable tag output, and bakes in the full NordIQ system prompt
+including VISION RULE and GROUNDING RULE. Rebuild any time you change
+the Modelfile.
+
+The previous `Modelfile` (which builds `nordiq:1`) is kept in the repo
+for reference and rollback — it has the same persona but no vision or
+KB grounding instructions.
 
 ### Recommended Ollama runtime flags (macOS)
 
@@ -93,42 +100,64 @@ Preview serves on `http://localhost:4173/` by default. The same
 > resident can push the machine into swap. Stop the dev server before
 > running preview, or close one of the browser tabs.
 
-## What's in the mockup
+## Two surfaces
 
-- **Hero state** with greeting + composer + suggestions in the left
-  rail (six starter prompts).
-- Click a suggestion → it's sent live to the model, which streams a
-  reply token-by-token.
-- Recent chats persist in `localStorage` (max 8). Click an item to
-  reopen the transcript. **+ New chat** clears state and returns to
-  the hero. The brand pill at the top of the rail also acts as a
-  home button.
-- **System health panel** at the bottom of the rail — three rows:
-  Model, Hosting (CloudFrame Nordic, mocked), LLM API (Lumeon,
-  mocked). Real Ollama health for the model, deterministic 3-min
-  rotation for the suppliers so you can see the health banner appear
-  during a demo.
-- **Dev health panel** below it — only renders in `import.meta.env.DEV`.
-  Shows last-turn `load_duration`, `prompt_eval`, `eval` tokens and
-  speed, total wall-clock, and tag-validity status. Stripped from
-  production bundles automatically.
-- **Themed orb** per agent reply — teal for direct-answer, warm for
-  follow-up / ticket-created, alert-red for incident-flagged. Driven
-  by the `<NORDIQ classification="…" />` tag in the model output.
-- Inline cards rendered from the same tag:
-  - `KBLinkCard` for direct-answer with a `source` attribute.
-  - `FollowUpCard` for follow-up with `questions="A | B | C"`.
-  - `TicketDraftCard` for ticket-created (id, priority, route).
-  - `EscalationBanner` for incident-flagged (route, reason).
-- **Low-confidence hint** — a calm warm-tinted callout that appears
-  when the model emits `confidence="low"`, gently suggesting opening
-  a ticket instead.
+The mockup is structured around the CAB demo, not around an employee
+self-serve product. Two views, one toggle.
+
+### 1. Shadow Replay (default — CAB-facing)
+
+Opens by default. A play button streams a representative queue of
+yesterday's first-line tickets through NordIQ in shadow mode — the
+agent isn't actually replying to anyone, it's deciding what it would
+have done. The audience sees four kinds of verdict assigned live:
+**deflect**, **escalate**, **incident**, **security**.
+
+The demoable moment: three differently-worded tickets from
+Engineering (one about "time reporting bouncing back to login", one
+about "register hours auth loop after NordID", one about NordTrack
+itself) get semantically clustered into a single P2 incident
+candidate. That correlation is hard to fake with rules and lands in
+its own evidence card on the right.
+
+The right-hand evidence panel aggregates the run into the numbers
+CAB cares about: deflection %, escalation count, incident clusters
+formed, security routings — and a conditional go-live verdict at the
+bottom.
+
+Files: `src/views/ShadowReplayView.tsx`,
+`src/hooks/useShadowReplay.ts`, `src/lib/replay/`,
+`src/components/replay/`.
+
+### 2. Employee chat (behind "Open employee view" in the header)
+
+The original chat surface. Persona is Lina Nordin (HR). Onboarding-
+shaped starter prompts in the left rail; free-text composer with
+paperclip/drag-drop image attach. Demonstrates three things if you
+need to show what an actual employee interaction looks like:
+
+- **IT-intake packet.** Onboarding-style requests produce a structured
+  `ServiceRequestPacket` — per-system requests, missing fields,
+  required approvals, risks, ready-to-submit verdict. Click the
+  inline card to open the full Sheet.
+- **KB-grounded answers.** Each turn runs a keyword search across 8
+  mock KB articles (`src/lib/kb/articles.ts`); top hits inject into
+  the user turn. Modelfile GROUNDING RULE constrains
+  `<NORDIQ source="…" />` to real titles — no hallucinated KB. Source
+  chip opens a Sheet with the body, owner, and review date (SLO #6).
+- **Vision.** Drop a screenshot, model reads it locally, triages
+  accordingly.
+
+Other surface details: themed agent orb per classification, inline
+`KBLinkCard` / `FollowUpCard` / `TicketDraftCard` / `EscalationBanner`,
+low-confidence hint, system-health rail panel (real model ping + mocked
+supplier rotation), dev-only DevHealthPanel with last-turn telemetry.
 
 ## What the agent will and won't do
 
-The persona, language rule, hard rules, vocabulary, and
-`<NORDIQ />` tag protocol all live in `Modelfile` (baked into the
-`nordiq:1` model). Hard rules:
+Persona, language rule, hard rules, vocabulary, tag protocol,
+GROUNDING RULE, VISION RULE and INTAKE FLOW all live in
+`Modelfile.nordiq2` (baked into `nordiq:2`). Hard rules:
 
 - **Phishing / credential prompts** → never click. Hand off to
   *Karl Eek · Security on-call*.
@@ -138,57 +167,85 @@ The persona, language rule, hard rules, vocabulary, and
 - **Don't invent KB articles or runbook URLs.** When unsure, say so
   and offer to open a ticket.
 
-Tested live with `nordiq:1` on `gemma4:e2b`, four canonical flows pass:
+## Demo flow for CAB
 
-| Prompt | Expected behaviour |
-|---|---|
-| "Hi, I'm locked out. Need to reset my password." | Direct answer, references NordID portal, KB-link chip. |
-| "Hej, jag är låst ute. Hur återställer jag lösenordet?" | Same, in Swedish. Language rule lives in the Modelfile prompt. |
-| "NordTrack won't let me in. Two colleagues say the same." | Flags as P2 incident, routes to Anna Berg · IT Ops on-call, tells user not to retry. |
-| "Got an email asking me to verify my password — should I click?" | Refuses to evaluate, routes to Karl Eek · Security on-call. |
+1. Open the app — Shadow Replay greets you with "Awaiting shadow
+   replay" and a Play button.
+2. Click **Play replay**. Twelve tickets stream in over ~30–40 s,
+   each classified live by `nordiq:2` (you can see "Live
+   classification · nordiq:2 local" pulsing in the header).
+3. Mid-run, three differently-worded reports (T-002, T-003, T-004)
+   get clustered into one `nordtrack-auth` / `sso-auth-loop` incident
+   — chip appears under each, plus the Incident Correlation card on
+   the right.
+4. Run finishes — verdict appears at the bottom of the evidence
+   panel: "Conditional go. Pilot readiness."
+5. Click **Open employee view** to show the actual employee surface
+   (one Lina-onboarding run is the strongest single example).
+6. Back via the small pill top-left.
 
 ## Folder structure
 
 ```
-Modelfile                       — nordiq:1 build recipe (FROM gemma4:e2b)
+Modelfile                       — legacy nordiq:1 (kept for rollback)
+Modelfile.nordiq2               — current nordiq:2 build recipe
 src/
-├── App.tsx
+├── App.tsx                      — surface switcher (Shadow Replay ⇄ chat)
 ├── main.tsx
 ├── index.css                    — tokens, ambient gradient, motion utilities
 ├── vite-env.d.ts
 ├── lib/
 │   ├── types.ts
-│   ├── mock-data.ts             — `me` employee + 6 starter prompts
+│   ├── mock-data.ts             — Lina as `me`, three onboarding-shaped prompts
 │   ├── chat-store.ts            — localStorage chats + active id + model
 │   ├── utils.ts
+│   ├── kb/
+│   │   ├── articles.ts          — 8 mock KB articles with owner/reviewedAt
+│   │   └── search.ts            — keyword scoring + title lookup
+│   ├── intake/
+│   │   └── types.ts             — ServiceRequestPacket schema + EXAMPLE_PACKET
+│   ├── replay/
+│   │   ├── types.ts             — REPLAY_QUEUE (12 tickets) + result types
+│   │   └── parse.ts             — <NORDIQ_REPLAY/> + <NORDIQ_CLUSTER/> parsers
 │   └── ollama/
 │       ├── adapter.ts           — health() / preload() / chat() (streaming + ChatMeta)
-│       ├── prompt.ts            — buildMessages() (no system role; baked into nordiq:1)
-│       └── parse.ts             — <NORDIQ /> tag extractor (stream-safe)
+│       ├── prompt.ts            — buildMessages() — prepends KB excerpts
+│       └── parse.ts             — <NORDIQ /> tag + <NORDIQ_PACKET> extractor
 ├── hooks/
-│   ├── useNordIQAgent.ts        — adapter + store + state + telemetry
+│   ├── useNordIQAgent.ts        — chat surface adapter + store + state
+│   ├── useShadowReplay.ts       — replay orchestrator (classify + cluster pass)
 │   └── useSystemHealth.ts       — model ping + mocked supplier rotation
 ├── components/
-│   ├── AgentOrb.tsx             — themed orb (default / warm / alert)
-│   ├── Composer.tsx
-│   ├── HistoryRail.tsx          — left rail
-│   ├── SystemHealthPanel.tsx    — system-health rows + degradation banner
-│   ├── DevHealthPanel.tsx       — dev-only telemetry (last turn timings + tag valid)
+│   ├── AgentOrb.tsx
+│   ├── Composer.tsx             — paperclip + drag-drop image upload
+│   ├── HistoryRail.tsx
+│   ├── SystemHealthPanel.tsx
+│   ├── DevHealthPanel.tsx       — dev-only telemetry (stripped in prod)
 │   ├── ui/                      — Button, Card, Badge, Sheet, Tabs, Tooltip, Input
+│   ├── intake/
+│   │   ├── ServiceRequestPacketCard.tsx  — inline summary
+│   │   └── ServiceRequestPacketSheet.tsx — full read-out
+│   ├── replay/
+│   │   ├── TicketCard.tsx                — single replay row
+│   │   └── EvidencePanel.tsx             — right-hand CAB evidence
 │   └── chat/
 │       ├── AgentMessage.tsx
 │       ├── KBLinkCard.tsx
+│       ├── KBArticleSheet.tsx
 │       ├── FollowUpCard.tsx
 │       ├── TicketDraftCard.tsx
 │       └── EscalationBanner.tsx
 └── views/
-    └── ChatView.tsx
+    ├── ChatView.tsx
+    └── ShadowReplayView.tsx
 ```
 
-## Roadmap
+## Roadmap (post-MVP)
 
-- **Phase 3:** settings popover with a model picker fed by
-  `/api/tags`, plus a "clear history" button.
-- **Phase 4 (optional):** image upload — qwen3.5 and gemma4 both
-  support vision, so an employee could paste a screenshot of an
-  error message and the agent could read it.
+- Editable tickets in Shadow Replay — change one inline, watch the
+  classification update so a skeptic can probe.
+- Persistence of the last replay run across reload (currently in-
+  memory).
+- Real KB ingestion path (Confluence/SharePoint adapter) instead of
+  the in-process 8-article fixture.
+- Settings popover with a model picker fed by `/api/tags`.

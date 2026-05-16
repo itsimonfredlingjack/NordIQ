@@ -14,6 +14,10 @@ const BASE = "/ollama";
 export interface OllamaMessage {
   role: "system" | "user" | "assistant";
   content: string;
+  /** Base64-encoded image strings (no data: prefix). Ollama's vision
+   * API accepts them as `images[]` on a user message — we just include
+   * the field on the OllamaMessage and let JSON.stringify forward it. */
+  images?: string[];
 }
 
 export interface OllamaModelInfo {
