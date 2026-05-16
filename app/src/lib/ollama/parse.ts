@@ -144,6 +144,25 @@ function parsePacket(raw: string): ServiceRequestPacket | null {
     ) {
       return null;
     }
+    const requests = (obj.requests as unknown[])
+      .filter(
+        (r): r is Record<string, unknown> =>
+          typeof r === "object" && r !== null,
+      )
+      .map((r: Record<string, unknown>, i: number) => ({
+        id: typeof r.id === "string" ? r.id : `REQ-${i}`,
+        title: typeof r.title === "string" ? r.title : "Untitled request",
+        service: typeof r.service === "string" ? r.service : "—",
+        routedTo:
+          typeof r.routedTo === "string" ? r.routedTo : "IT Ops on-call",
+        body: typeof r.body === "string" ? r.body : "",
+        approvers: Array.isArray(r.approvers)
+          ? (r.approvers as unknown[]).filter(
+              (x): x is string => typeof x === "string",
+            )
+          : [],
+        status: normalizeStatus(r.status),
+      }));
     return {
       id: typeof obj.id === "string" ? obj.id : `PKT-${Date.now()}`,
       subject: obj.subject,
@@ -152,25 +171,7 @@ function parsePacket(raw: string): ServiceRequestPacket | null {
           ? obj.createdAt
           : new Date().toISOString(),
       intent: typeof obj.intent === "string" ? obj.intent : "",
-      requests: (obj.requests as unknown[])
-        .filter(
-          (r): r is Record<string, unknown> =>
-            typeof r === "object" && r !== null,
-        )
-        .map((r: Record<string, unknown>, i: number) => ({
-          id: typeof r.id === "string" ? r.id : `REQ-${i}`,
-          title: typeof r.title === "string" ? r.title : "Untitled request",
-          service: typeof r.service === "string" ? r.service : "—",
-          routedTo:
-            typeof r.routedTo === "string" ? r.routedTo : "IT Ops on-call",
-          body: typeof r.body === "string" ? r.body : "",
-          approvers: Array.isArray(r.approvers)
-            ? (r.approvers as unknown[]).filter(
-                (x): x is string => typeof x === "string",
-              )
-            : [],
-          status: normalizeStatus(r.status),
-        })),
+      requests,
       missing: Array.isArray(obj.missing)
         ? (obj.missing as unknown[])
             .filter(
@@ -199,8 +200,11 @@ function parsePacket(raw: string): ServiceRequestPacket | null {
             }))
             .filter((r) => r.label)
         : [],
+      // Derived from the normalized request statuses — never trust the
+      // model's self-reported readyToSubmit. A request that's
+      // needs_input / needs_approval / blocked must block submit.
       readyToSubmit:
-        typeof obj.readyToSubmit === "boolean" ? obj.readyToSubmit : false,
+        requests.length > 0 && requests.every((r) => r.status === "ready"),
     } as ServiceRequestPacket;
   } catch {
     return null;

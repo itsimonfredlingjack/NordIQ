@@ -117,8 +117,11 @@ The demoable moment: three differently-worded tickets from
 Engineering (one about "time reporting bouncing back to login", one
 about "register hours auth loop after NordID", one about NordTrack
 itself) get semantically clustered into a single P2 incident
-candidate. That correlation is hard to fake with rules and lands in
-its own evidence card on the right.
+candidate. Clustering runs as a second pass *after* every ticket has
+been classified — chips and the Incident Correlation card therefore
+appear at the end of the run, not during the stream. That correlation
+is hard to fake with rules and is the moment the audience should
+remember.
 
 The right-hand evidence panel aggregates the run into the numbers
 CAB cares about: deflection %, escalation count, incident clusters
@@ -174,12 +177,13 @@ GROUNDING RULE, VISION RULE and INTAKE FLOW all live in
 2. Click **Play replay**. Twelve tickets stream in over ~30–40 s,
    each classified live by `nordiq:2` (you can see "Live
    classification · nordiq:2 local" pulsing in the header).
-3. Mid-run, three differently-worded reports (T-002, T-003, T-004)
-   get clustered into one `nordtrack-auth` / `sso-auth-loop` incident
-   — chip appears under each, plus the Incident Correlation card on
-   the right.
-4. Run finishes — verdict appears at the bottom of the evidence
-   panel: "Conditional go. Pilot readiness."
+3. After the last ticket lands, a second pass runs over everything
+   the model flagged as `incident`. Three differently-worded reports
+   (T-002, T-003, T-004) get clustered into one `nordtrack-auth` /
+   `sso-auth-loop` incident — a chip appears under each ticket and
+   the Incident Correlation card pops in on the right.
+4. Verdict appears at the bottom of the evidence panel: "Conditional
+   go. Pilot readiness."
 5. Click **Open employee view** to show the actual employee surface
    (one Lina-onboarding run is the strongest single example).
 6. Back via the small pill top-left.

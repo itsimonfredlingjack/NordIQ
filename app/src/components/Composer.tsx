@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 
+// Hard caps to keep us under localStorage quota + Ollama request size.
+// Base64 inflates payload ~33 %, and the 8-chat ring is persisted in
+// localStorage where safeWrite() silently drops on quota. 2 MB raw per
+// image / 4 images per turn keeps a single chat below ~10 MB encoded.
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_IMAGES_PER_TURN = 4;
+
 interface Pending {
   id: string;
   /** Full data URL — used only to render the thumbnail. */
@@ -31,34 +38,70 @@ export function Composer({
 }) {
   const [pending, setPending] = useState<Pending[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (files: FileList | File[]) => {
-    const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
-    if (arr.length === 0) return;
+    const images = Array.from(files).filter((f) =>
+      f.type.startsWith("image/"),
+    );
+    if (images.length === 0) return;
 
-    arr.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = String(reader.result ?? "");
-        const b64 = dataUrl.includes(",") ? dataUrl.split(",", 2)[1] : "";
-        if (!b64) return;
-        setPending((cur) => [
-          ...cur,
-          {
-            id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            dataUrl,
-            b64,
-            name: file.name,
-          },
-        ]);
-      };
-      reader.readAsDataURL(file);
+    setAttachError(null);
+    const errors: string[] = [];
+
+    setPending((cur) => {
+      const freeSlots = MAX_IMAGES_PER_TURN - cur.length;
+      if (freeSlots <= 0) {
+        errors.push(`Up to ${MAX_IMAGES_PER_TURN} images per turn.`);
+        return cur;
+      }
+      if (images.length > freeSlots) {
+        errors.push(
+          `Only the first ${freeSlots} image${freeSlots === 1 ? "" : "s"} attached (max ${MAX_IMAGES_PER_TURN} per turn).`,
+        );
+      }
+      const accept = images.slice(0, freeSlots).filter((f) => {
+        if (f.size > MAX_IMAGE_BYTES) {
+          errors.push(`${f.name} is ${(f.size / 1024 / 1024).toFixed(1)} MB — over the 2 MB cap.`);
+          return false;
+        }
+        return true;
+      });
+
+      accept.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = String(reader.result ?? "");
+          const b64 = dataUrl.includes(",") ? dataUrl.split(",", 2)[1] : "";
+          if (!b64) return;
+          setPending((c) => {
+            // Re-check the slot count at apply time so two rapid drops
+            // can't both push past the cap.
+            if (c.length >= MAX_IMAGES_PER_TURN) return c;
+            return [
+              ...c,
+              {
+                id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                dataUrl,
+                b64,
+                name: file.name,
+              },
+            ];
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+
+      return cur;
     });
+
+    if (errors.length > 0) setAttachError(errors.join(" "));
   };
 
   const removePending = (id: string) => {
     setPending((cur) => cur.filter((p) => p.id !== id));
+    setAttachError(null);
   };
 
   const trySubmit = () => {
@@ -68,6 +111,7 @@ export function Composer({
     if (!hasText && !hasImages) return;
     const images = pending.map((p) => p.b64);
     setPending([]);
+    setAttachError(null);
     onSubmit(hasImages ? images : undefined);
   };
 
@@ -102,6 +146,11 @@ export function Composer({
           "border-[var(--color-accent-border)] shadow-[0_8px_40px_-8px_oklch(75%_0.13_195/0.32)]",
       )}
     >
+      {attachError && (
+        <div className="pt-1 text-[11.5px] text-[var(--color-warm)]">
+          {attachError}
+        </div>
+      )}
       {pending.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-1">
           {pending.map((p) => (
