@@ -1,4 +1,4 @@
-# NordIQ — Go-Live Readiness Package
+# GO-LIVE READINESS PACKAGE
 
 > **A S S I G N M E N T · I P L 2 5**
 > **NordIQ — AI-stödd First-Line Support**
@@ -17,48 +17,56 @@
 
 ## What You Deliver
 
-### Vad paketet innehåller
-
 Ett **Go-Live Readiness Package** för NordIQ vid NordTech AB: den samling artefakter ett IT-PM-team skulle överlämna till CIO och CAB för att få sign-off inför produktion.
 
-Paketet beskriver NordIQ i **service language**. Det betyder att tjänsten inte beskrivs som en teknikstack eller en chatbot, utan som en intern IT-tjänst med service consumers, service levels, incidenthantering, escalation, rollback och continual improvement.
+Paketet beskriver NordIQ i **service language**. Det betyder att NordIQ behandlas som en intern IT-tjänst med service consumers, service levels, incidenthantering, escalation, rollback och continual improvement — inte bara som en teknikstack eller chatbot.
 
-Underlaget stödjer ett **conditional Go/No-Go decision**. Det betyder att dokumenten beskriver vad som behöver vara sant inför go-live, men de ska inte läsas som att produktion redan är godkänd eller att alla kontroller redan är verifierade.
+### 1. Cover & Snapshot
 
-| # | Artefakt | Beskrivning | Innehåll | Repo-fil |
-|---|----------|-------------|----------|----------|
-| 1 | **Cover & Snapshot** | Describes NordIQ in service language — not as a stack. | Service Definition, Stakeholder Map, Value · Utility · Warranty, Four Dimensions | [docs/1. Cover & Snapshot.md](<docs/1. Cover & Snapshot.md>) |
-| 2 | **Service Levels** | Defines what "good enough" means before go-live. | Internal SLOs, rationale per target, how each is measured, Service Request Handling | [docs/2. Service Levels.md](<docs/2. Service Levels.md>) |
-| 3 | **Operational Readiness** | How NordIQ runs day-to-day — and recovers when it breaks. | Major-Incident Playbook, Problem-Management Approach, Continual Improvement Register, On-call & Escalation Map | [docs/3. Operational Readiness.md](<docs/3. Operational Readiness.md>) |
-| 4 | **Change & Release** | The plan to take NordIQ into production — and back out. | RFC for go-live, CAB Design, Go/No-Go Criteria, Rollback Plan | [docs/4. Change & Release.md](<docs/4. Change & Release.md>) |
+**Describes NordIQ in service language — not as a stack.**
+
+**Artifact**
+
+- Service Definition
+- Stakeholder Map
+- Value · Utility · Warranty
+- Four Dimensions
+
+### 2. Service Levels
+
+**Defines what "good enough" means before go-live.**
+
+**Artifact**
+
+- Internal SLOs
+- Rationale per target
+- How each is measured
+- Service Request Handling
+
+### 3. Operational Readiness
+
+**How NordIQ runs day-to-day — and recovers when it breaks.**
+
+**Artifact**
+
+- Major-Incident Playbook
+- Problem-Management Approach
+- Continual Improvement Register
+- On-call & Escalation Map
+
+### 4. Change & Release
+
+**The plan to take NordIQ into production — and back out.**
+
+**Artifact**
+
+- RFC for go-live
+- CAB Design
+- Go/No-Go Criteria
+- Rollback Plan
 
 **CIO** = Chief Information Officer
-**CAB** = Change Advisory Board, the body that approves or advises on go-lives.
-
-### Mockup
-
-[mockup/](mockup/) innehåller en klickbar single-screen-mockup av medarbetarytan för NordIQ.
-
-Mockupen visar servicebeteende genom tre scripted scenarios:
-
-- lösenordsåterställning som FAQ/deflection-exempel;
-- onboarding av konsult som service request och strukturerad ticket/handoff;
-- incidentliknande inloggningsproblem där agenten eskalerar till människa.
-
-Mockupen är visuellt stöd för tjänsteflödet. Den är inte bevis på produktionsklar LLM-integration, SLO-uppföljning, CAB-godkännande eller driftberedskap.
-
-```bash
-cd mockup
-npm install
-npm run dev
-npm run typecheck
-```
-
-### Verification Note
-
-Värden som inte är direkt verifierade i skolmaterialet ska behandlas som **assumptions**, **targets**, **go/no-go criteria** eller **verification needs**.
-
-Detta package ska därför inte påstå att go-live är approved. Det ska visa vad CAB behöver kunna bedöma innan NordIQ kan gå live.
+**CAB** = Change Advisory Board, the body that approves go-lives.
 
 ---
 
@@ -72,7 +80,7 @@ NordIQ är en AI-stödd intern first-line supporttjänst för NordTech AB:s meda
 
 NordIQ tar emot supportförfrågningar, klassificerar dem, besvarar återkommande FAQ-liknande ärenden när Knowledge Base räcker och eskalerar ärenden som kräver mänsklig hantering till rätt supportflöde.
 
-Tjänsten ska skapa värde genom kortare väntetid, lägre repetitiv first-line-belastning och mer strukturerade escalations. Den ersätter inte mänskligt ansvar för kritiska, osäkra eller känsliga ärenden.
+Tjänsten ska skapa värde genom kortare väntetid, lägre repetitiv first-line-belastning och mer strukturerade escalations. NordIQ ersätter inte mänskligt ansvar för kritiska, osäkra eller känsliga ärenden.
 
 ### Stakeholders & Value Statements
 
@@ -83,7 +91,7 @@ Värdeflödet mellan tjänsten och dess intressenter sammanfattas i tabellen ned
 | Roll | Risk Removed | Risk Imposed | Cost Removed | Cost Imposed |
 |------|--------------|--------------|--------------|--------------|
 | **Lina, HR** | Kan onboarda nya medarbetare utan flaskhals hos IT. | AI-hallucinationer kan ge fel i onboardingen, till exempel fel access. | Tidseffektivt om tjänsten fungerar. | Dubbelarbete om NordIQ ger fel svar eller behöver korrigeras manuellt. |
-| **Karl, Dev** | Mindre brandsläckning på enkla L1-ärenden och mer tid för plattformsutveckling. | Om agenten ger fel svar kopplas risken till plattformen han byggt. | Mindre manuell support för FAQ-klassade ärenden. | Äger kunskapsbas och agentbeteende som måste hållas uppdaterade kontinuerligt. |
+| **Karl, Dev** | Mindre brandsläckning på enkla L1-ärenden och mer tid för plattformsutveckling. | Om agenten ger fel svar kopplas risken till plattformen han byggt. | Mindre manuell support för FAQ-klassade ärenden. | Äger Knowledge Base och agentbeteende som måste hållas uppdaterade kontinuerligt. |
 | **Martin, CIO** | Politisk risk minskar om NordIQ levererar och kan visa Q4-besparingar till CEO. | Om NordIQ fallerar internt bär han ansvaret uppåt. | Lägre L1-personalkostnad på sikt om deflection håller. | Go-live-beslutet ligger hos honom; fel timing skadar trovärdighet och förtroende. |
 | **Erik, CFO** | Förutsägbarare IT-kostnader om deflection och leverantörskostnad håller. | Lumeon API-kostnad kan skala okontrollerat vid hög volym. | Färre timmar fakturerade mot L1-support. | Ny löpande kostnad för tokens och hosting. |
 | **Anna, Ops** | Slipper repetitiva ärenden som tar tid från komplexa problem. | Eskaleringsflödet beror på att agenten klassificerar rätt; fel klassificering skickar ärenden till fel resolver. | Lägre volym enkla tickets att hantera manuellt. | Äger driften av en tjänst hon inte byggde och måste kunna lita på efter go-live. |
@@ -92,9 +100,9 @@ Värdeflödet mellan tjänsten och dess intressenter sammanfattas i tabellen ned
 
 #### 1. Organizations & People
 
-NordIQ stödjer NordTechs medarbetare genom att erbjuda en snabbare first-line-ingång för återkommande IT-supportbehov. Lina Nordin, Head of HR, påverkas särskilt vid onboarding och åtkomstrelaterade frågor. Anna Berg, IT Ops Lead, hanterar eskalerade ärenden och behöver kunna ta över driftansvar efter go-live.
+NordIQ stödjer NordTechs medarbetare genom att erbjuda en snabbare first-line-ingång för återkommande IT-supportbehov. Lina Nordin, Head of HR, använder tjänsten ofta för onboarding och åtkomstrelaterade problem. Anna Berg, IT Ops Lead, hanterar eskalerade ärenden och behöver kunna säkerställa tjänstens stabilitet efter go-live.
 
-CIO Martin Lindqvist fokuserar på affärsvärde, risk och beslutspunkt. CFO Erik Holm fokuserar på kostnadskontroll, leverantörsberoenden och run-rate. Karl Eek, Internal Dev Lead, ansvarar för AI Agent Platform och tekniska begränsningar.
+CIO Martin Lindqvist fokuserar på affärsvärde och minskad operativ risk. CFO Erik Holm fokuserar på kostnadseffektivitet, leverantörsberoenden och run-rate. Karl Eek, Internal Dev Lead, ansvarar för AI Agent Platform och tekniska begränsningar.
 
 En viktig rollgräns är ägandeskapet av AI-agentens svar. När NordIQ besvarar ett ärende automatiskt behöver det vara tydligt när ansvaret ligger hos IT Ops, Dev Lead, processägare eller mänsklig resolver.
 
@@ -106,7 +114,7 @@ Svarskvaliteten är direkt beroende av att Knowledge Base hålls uppdaterad. En 
 
 #### 3. Partners & Suppliers
 
-NordIQ är beroende av externa leverantörer. **CloudFrame Nordic** hostar AI Agent Platform och är därför kritisk för tjänstens availability. **Lumeon API** är LLM API för agentlagret och påverkar svarsförmåga, latens, kvalitet och tokenkostnad.
+NordIQ är beroende av externa leverantörer. **CloudFrame Nordic** ansvarar för drift och hosting av AI Agent Platform. **Lumeon API** är LLM API för agentlagret och påverkar svarsförmåga, latens, kvalitet och tokenkostnad.
 
 Leverantörerna är service constraints. NordTech kan inte lova högre intern service level än vad den egna driftkedjan, CloudFrame Nordic och Lumeon API faktiskt kan stödja.
 
@@ -116,7 +124,7 @@ Value stream börjar när en medarbetare skickar in en IT-supportförfrågan. No
 
 Om problemet inte kan lösas automatiskt eskaleras ärendet till Anna Berg, IT Ops eller rätt resolver enligt definierat supportflöde. Eskalering inom två minuter är ett service target och behöver verifieras innan det används som CAB-evidence.
 
-Value stream inkluderar även failover vid avbrott i AI-agenten. Då ska inkommande ärenden dirigeras till manuell first-line-hantering, SharePoint FAQ eller befintligt ärendehanteringssystem enligt rollback- och incidentrutin. Failover är alltså inte ett undantag från tjänsten, utan en planerad del av tjänstens continuity.
+Value stream inkluderar även failover vid avbrott i AI-agenten. Då ska inkommande ärenden dirigeras till manuell first-line-hantering, SharePoint FAQ eller befintligt ärendehanteringssystem enligt rollback- och incidentrutin. Failover är inte ett undantag från tjänsten, utan en planerad del av tjänstens continuity.
 
 ### Utility vs Warranty
 
@@ -130,7 +138,7 @@ NordIQ skapar värde för NordTech genom att ge medarbetarna en mer tillgänglig
 
 #### Warranty
 
-- **Availability:** Tjänsten ska matcha ambitionen om 24/7-support, vilket kräver tillräcklig uptime från både CloudFrame Nordic, Lumeon API och den interna supportkedjan.
+- **Availability:** Tjänsten ska matcha användarnas behov av 24/7-support, vilket kräver tillräcklig uptime från både CloudFrame Nordic, Lumeon API och den interna supportkedjan.
 - **Continuity:** Robusta fallback-rutiner behövs vid avbrott i AI-plattformen, till exempel omdirigering till manuell hantering.
 - **Korrekt information:** Knowledge Base måste hållas synkad så att AI-agenten ger korrekta, säkra och användbara svar.
 
