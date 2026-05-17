@@ -130,34 +130,37 @@ export function useNordIQAgent() {
         timestamp: new Date().toISOString(),
       };
 
+      // Pin (or mint) the chat id SYNCHRONOUSLY here — don't bind it
+      // inside the setState updater. React reserves the right to defer
+      // or replay the updater, which would leave `chatId` undefined
+      // when persist() and the agentId message-map run below. The let-
+      // assigned-inside-setState pattern used to live here looked safe
+      // because React 18's default scheduler runs the updater
+      // synchronously, but it's a foot-gun the moment anything in the
+      // tree opts into concurrent rendering.
+      const chatId =
+        state.chatId ??
+        (typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `c-${Date.now()}`);
+
       // Snapshot the history we'll feed the model. Note: we send the
       // history BEFORE adding the new user msg as the array, then
       // pass `trimmed` separately to buildMessages.
       let priorMessages: ChatMessage[] = [];
-      let activeId: string;
 
       setState((s) => {
         priorMessages = s.messages;
-        activeId =
-          s.chatId ??
-          (typeof crypto.randomUUID === "function"
-            ? crypto.randomUUID()
-            : `c-${Date.now()}`);
         return {
           ...s,
           mode: "playing",
-          chatId: activeId,
+          chatId,
           messages: [...s.messages, userMsg, agentPlaceholder],
           streaming: true,
           thinking: true,
           error: null,
         };
       });
-
-      // We can't read the just-set state synchronously; rebuild the
-      // chatId locally. (setState callback ran; activeId is bound.)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const chatId = activeId!;
 
       try {
         let buf = "";
@@ -257,7 +260,11 @@ export function useNordIQAgent() {
         });
       }
     },
-    [state.model, persist],
+    // state.chatId needs to be in the deps: if a user starts a new
+    // chat (newChat() sets it to null) and then types a follow-up, the
+    // outer-scope `chatId` we pin above must reflect the cleared id,
+    // not the stale id from the previous chat's render.
+    [state.model, state.chatId, persist],
   );
 
   // -------------------------------------------------------------------

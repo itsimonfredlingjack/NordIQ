@@ -260,8 +260,15 @@ export async function* chat({
       } catch (e) {
         // Don't kill the stream on a single bad line — Ollama occasionally
         // emits a fragment when the upstream model errors. Re-throw if it's
-        // a real error (above), otherwise keep going.
+        // a real error (above), otherwise log and keep going so we have a
+        // trail when "the chat just stopped" turns out to be one corrupt
+        // NDJSON frame eaten mid-stream.
         if (e instanceof Error && e.message.startsWith("Ollama:")) throw e;
+        console.warn(
+          "[ollama] dropped malformed NDJSON line:",
+          line.slice(0, 160),
+          e,
+        );
       }
     }
   }
@@ -272,8 +279,15 @@ export async function* chat({
       const obj = JSON.parse(buffer) as { message?: { content?: string } };
       const piece = obj.message?.content;
       if (piece) yield piece;
-    } catch {
-      // ignore
+    } catch (e) {
+      // Don't blow up the turn over an unparseable tail, but leave a
+      // breadcrumb — a silently dropped final fragment is exactly the
+      // "reply got cut off and I have no idea why" failure mode.
+      console.warn(
+        "[ollama] dropped unparseable trailing buffer:",
+        buffer.slice(0, 160),
+        e,
+      );
     }
   }
 }

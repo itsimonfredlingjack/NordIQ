@@ -132,7 +132,12 @@ export function useShadowReplay() {
         for await (const piece of stream) {
           buf += piece;
         }
-      } catch {
+      } catch (e) {
+        // Clustering is best-effort — if the model errors we keep the
+        // per-ticket classifications as-is. But log it so the demo
+        // operator can see "incidents weren't grouped because X" rather
+        // than wondering why the cluster column is empty.
+        console.warn("[shadow-replay] clustering failed, leaving incidents ungrouped:", e);
         return current;
       }
 
