@@ -1,23 +1,18 @@
 flowchart LR
-    A[Service Snapshot\n01-service-snapshot.md\n\nVad är tjänsten?\nVem påverkas?\nUtility & Warranty] --> B
+    A[Service Snapshot<br/>Vad är tjänsten?<br/>Vem påverkas?<br/>Utility & Warranty] --> B
+    B[Service Levels<br/>SLO, SLI och baselinebehov<br/>Go/No-Go-kriterier] --> C
+    C[Operational Readiness<br/>Incident Playbook<br/>Handover-villkor<br/>Escalation] --> D
+    D[Change & Release RFC<br/>RFC-NordIQ-001<br/>Verifieringskrav<br/>Rollback-villkor] --> E
+    E{CAB-beslut<br/>Är villkoren verifierade?}
 
-    B[SLO:er & mätning\n02-service-levels-slo.md\n\nMål, baselinebehov\nGo/No-Go-kriterier] --> C
-
-    C[Operational Readiness\n03-operational-readiness.md\n\nDriftmodell föreslagen\nIncident Playbook\nHandover-villkor] --> D
-
-    D[Change & Release RFC\n04-change-release-rfc.md\n\nRFC-NordIQ-001\nVerifieringskrav\nRollback-villkor] --> E
-
-    E{CAB-beslut\n\nÄr villkoren verifierade?}
-
-    E -->|Ja - villkor stängda| F[GO-LIVE\nNordIQ produktionssätts]
-    E -->|Villkor kvarstår| G[Begränsad rollout\neller senarelagt go-live\nny verifiering]
-    E -->|Kritiska blockerare| H[Go-live skjuts upp\nroot cause åtgärdas\nny RFC-cykel]
+    E -->|Ja - villkor stängda| F[GO-LIVE<br/>NordIQ produktionssätts]
+    E -->|Villkor kvarstår| G[Begränsad rollout<br/>eller senarelagt go-live<br/>ny verifiering]
+    E -->|Kritiska blockerare| H[Go-live skjuts upp<br/>root cause åtgärdas<br/>ny RFC-cykel]
 
     G --> E
     H --> A
-
-    F --> I[Hypercare\nförstärkt uppföljning\nSLO-granskning]
-    I --> J[Business as Usual\nCI-möte\nSLO-uppföljning\nleverantörsconstraints]
+    F --> I[Hypercare<br/>förstärkt uppföljning<br/>SLO-granskning]
+    I --> J[Business as Usual<br/>Continual Improvement<br/>SLO-uppföljning<br/>supplier constraints]
 
     style A fill:#e3f2fd,stroke:#2196F3
     style B fill:#e3f2fd,stroke:#2196F3

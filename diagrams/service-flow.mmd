@@ -1,21 +1,21 @@
 flowchart TD
-    A[Medarbetare\nNordTech AB] -->|Teams / mejl / webbportal| B[NordIQ\nAI-agent]
+    A[Medarbetare<br/>NordTech AB] -->|Teams / mejl / webbportal| B[NordIQ<br/>AI-agent]
 
-    B -->|Svar hittas i kunskapsbas| C[Direkt svar\nlevereras]
-    B -->|Okänt ärende eller komplex fråga| D[Strukturerad ticket\nskapas i befintligt ärendehanteringssystem]
-    B -->|P1/P2 eller osäkert ärende| E[Omedelbar eskalering\ntill människa]
+    B -->|Svar hittas i Knowledge Base| C[Direkt svar<br/>levereras]
+    B -->|Okänt ärende eller komplex fråga| D[Strukturerad ticket<br/>skapas i befintligt ärendehanteringssystem]
+    B -->|P1/P2 eller osäkert ärende| E[Omedelbar escalation<br/>till människa]
 
     C -->|Medarbetaren bekräftar lösning| F[Feedback samlas]
-    C -->|Ny kunskapslucka| G[Kunskapsbas\nuppdateras]
+    C -->|Ny kunskapslucka| G[Knowledge Base<br/>uppdateras]
 
-    D -->|Routa till rätt grupp| H[Second line\neller specialist]
-    H -->|Lösning bekräftad| I[Ärende stängt\ni befintligt ärendehanteringssystem]
+    D -->|Routa till rätt grupp| H[Second line<br/>eller specialist]
+    H -->|Lösning bekräftad| I[Ärende stängt<br/>i befintligt ärendehanteringssystem]
     I --> G
 
-    E --> J[On-call / Anna Berg\neller Karl Eek]
+    E --> J[On-call / Anna Berg<br/>eller Karl Eek]
     J -->|Löst| I
-    J -->|Hostingproblem| K[CloudFrame Nordic\nhostingplattform]
-    J -->|LLM/API-problem| L[Lumeon API\nLLM API för agentlagret]
+    J -->|Hostingproblem| K[CloudFrame Nordic<br/>hostingplattform]
+    J -->|LLM/API-problem| L[Lumeon API<br/>LLM API för agentlagret]
     K -->|Löst| I
     L -->|Löst| I
 
