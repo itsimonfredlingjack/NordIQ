@@ -1,0 +1,31 @@
+flowchart TD
+    A[Medarbetare<br/>NordTech AB] -->|Teams / e-post / webbportal| B[Submit<br/>Ärende registreras direkt]
+
+    B --> C[Triage<br/>NordIQ klassificerar inom 2 sek]
+
+    C -->|FAQ / återkommande ärende| D[Fulfill<br/>AI-agenten ger svar]
+    C -->|Request / Change| E[Approve<br/>Chef, budgetägare, security eller dataägare]
+    C -->|Incident / okänt / osäkert ärende| F[Assign<br/>Eskalering till Anna Berg / IT Ops inom 2 min]
+
+    E --> G[Assign<br/>Routas till rätt fulfiller]
+    G --> H[Fulfill<br/>AI-agent, IT Ops, Incident Management,<br/>Change Enablement, Dev eller leverantör]
+
+    D --> I[Verify<br/>Användarbekräftelse eller kontroll]
+    H --> I
+    F --> H
+
+    I --> J[Close<br/>Ärende stängs]
+    J --> K[Kunskapslucka eller återkommande fel]
+    K --> L[Knowledge Base uppdateras<br/>inom 24 h]
+    K --> M[Continual Improvement Register]
+
+    C -->|AI/API/Knowledge Base-avbrott| N[Failover<br/>SharePoint FAQ + manuell ticket]
+    N --> F
+
+    style A fill:#e8f4fd,stroke:#2196F3
+    style C fill:#fff3e0,stroke:#F97316
+    style D fill:#e8f5e9,stroke:#4CAF50
+    style F fill:#ffebee,stroke:#F44336
+    style N fill:#ffebee,stroke:#F44336
+    style L fill:#f3e5f5,stroke:#9C27B0
+    style M fill:#f3e5f5,stroke:#9C27B0

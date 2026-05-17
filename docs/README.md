@@ -1,47 +1,26 @@
-# NordIQ Docs Portal
+# NordIQ Docs
 
-Det här är dokumentnavet för NordIQ Go-Live Readiness Package. Rotens [README](../README.md) visar den renderade översikten med Mermaid-flöden; den här sidan pekar till källartefakterna som CAB-underlaget består av.
+Det här är den uppdelade GitHub-versionen av NordIQ:s **Go-Live Readiness Package**. Källstrukturen är de fyra huvuddelarna i [../NordIQ_Go-Live_Readiness_Package-v2.md](../NordIQ_Go-Live_Readiness_Package-v2.md).
 
-## Reading Order
+## Package Artifacts
 
-| Order | Artifact | File | Use for |
-|-------|----------|------|---------|
-| 1 | Service Snapshot | [01-service-snapshot.md](01-service-snapshot.md) | Service definition, consumers, stakeholders, value, utility, warranty och Four Dimensions. |
-| 2 | Service Levels & SLOs | [02-service-levels-slo.md](02-service-levels-slo.md) | Mål, SLI/SLO, baselinebehov, go/no-go-kriterier och uppföljning. |
-| 3 | Operational Readiness | [03-operational-readiness.md](03-operational-readiness.md) | Service request flow, incidentnivåer, major incident playbook, handover och on-call. |
-| 4 | Change & Release RFC | [04-change-release-rfc.md](04-change-release-rfc.md) | RFC-NordIQ-001, scope, verifiering före CAB, rollback, hypercare och CAB-beslut. |
+| # | Artifact | File | Role in package |
+|---|----------|------|-----------------|
+| 1 | Cover & Snapshot | [1. Cover & Snapshot.md](1.%20Cover%20%26%20Snapshot.md) | Service definition, stakeholders, value, utility, warranty och Four Dimensions. |
+| 2 | Service Levels | [2. Service Levels.md](2.%20Service%20Levels.md) | Internal SLOs, rationale, mätning och Service Request Handling. |
+| 3 | Operational Readiness | [3. Operational Readiness.md](3.%20Operational%20Readiness.md) | Major-Incident Playbook, Problem-Management Approach, Continual Improvement Register och On-call & Escalation Map. |
+| 4 | Change & Release | [4. Change & Release.md](4.%20Change%20%26%20Release.md) | RFC, CAB Design, Go/No-Go Criteria och Rollback Plan. |
 
-## Supporting Registers
-
-| Register | File | Why it matters |
-|----------|------|----------------|
-| Risk Register | [risk-register.md](risk-register.md) | Visar öppna risker, föreslagna åtgärder, ägare och verifieringsbehov. |
-| Continual Improvement Register | [ci-register.md](ci-register.md) | Samlar förbättringar från incidenter, SLO-avvikelser, feedback och Knowledge Base-luckor. |
-| Stakeholder Map | [stakeholder-map.md](stakeholder-map.md) | Visar service consumers, interna intressenter, leverantörer och CAB-perspektiv. |
-| CAB Presentation Outline | [cab-presentation-outline.md](cab-presentation-outline.md) | Speaker notes för presentationen av villkorad go-live. |
-| Reflection | [05-reflection.md](05-reflection.md) | Gruppreflektion och lärdomar. |
-
-## Mermaid Sources
-
-GitHub renderar Mermaid direkt i Markdown, och diagrammens källkod ligger versionerad under `diagrams/`.
+## Diagram Sources
 
 | Diagram | Source |
 |---------|--------|
-| Go-Live Readiness Flow | [../diagrams/go-live-readiness-flow.mmd](../diagrams/go-live-readiness-flow.mmd) |
-| Service Flow | [../diagrams/service-flow.mmd](../diagrams/service-flow.mmd) |
-| Escalation Map | [../diagrams/escalation-map.mmd](../diagrams/escalation-map.mmd) |
+| Go-Live Readiness Package | [../diagrams/Go-Live Readiness Package.mmd](../diagrams/Go-Live%20Readiness%20Package.mmd) |
+| Service Request Handling | [../diagrams/2.2 Service Request Handling.mmd](../diagrams/2.2%20Service%20Request%20Handling.mmd) |
+| On-call & Escalation Map | [../diagrams/3.6 On-call & Escalation Map.mmd](../diagrams/3.6%20On-call%20%26%20Escalation%20Map.mmd) |
 
 ## Verification Rule
 
-Alla värden som inte är verifierade i case- eller testunderlag ska behandlas som **assumptions**, **targets**, **go/no-go criteria** eller **verification needs**.
+Värden som inte är verifierade i case-, test- eller pilotunderlag ska behandlas som **assumptions**, **targets**, **go/no-go criteria** eller **verification needs**.
 
-Det gäller särskilt:
-
-- SLO-baseline;
-- rollback-test;
-- CloudFrame Nordic SLA/supportväg;
-- Lumeon API SLA, latens och tokenkostnad;
-- faktisk deflection;
-- pilotresultat;
-- handover till Anna Berg;
-- säkerhets- och personuppgiftskontroller.
+Det gäller särskilt SLO-baseline, rollback-test, CloudFrame Nordic SLA/supportväg, Lumeon API SLA/latens/tokenkostnad, faktisk deflection, handover och driftberedskap.

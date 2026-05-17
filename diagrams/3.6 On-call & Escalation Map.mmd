@@ -1,0 +1,41 @@
+flowchart TD
+    A[Incident upptäcks<br/>larm eller användarrapport] --> B[First point of contact<br/>IT Ops / Anna Berg]
+
+    B --> C[Triage och deklaration<br/>Incident Commander]
+    C -->|Major Incident| D[War room inom 15 min<br/>Anna / Karl / IC / Communications Lead]
+    C -->|Ej major incident| E[Normal hantering<br/>IT Ops eller rätt resolver]
+
+    D --> F[Isolering / failover<br/>Karl Eek]
+    F -->|Stäng AI-chatten| G[NordIQ offline]
+    F -->|Emergency Redirect| H[SharePoint FAQ<br/>+ manuell ticket]
+
+    D --> I[Leverantörskontakt]
+    I -->|Hostingproblem| J[CloudFrame Nordic<br/>supplier ticket]
+    I -->|LLM/API-problem| K[Lumeon API<br/>supplier ticket]
+
+    D --> L[Fast Cadence<br/>uppdatering till IC var 30:e min]
+    L --> M[Martin Lindqvist<br/>30-minutersstatus vid SEV1]
+    L --> N[Erik Holm<br/>leverantör / kostnad]
+    L --> O[Anställda<br/>Teams / mail / all-clear]
+
+    J --> P[Upplösning]
+    K --> P
+    G --> P
+    H --> P
+    E --> P
+
+    P --> Q[Post-Incident Review<br/>efter SEV1/SEV2]
+    Q --> R[Problem Management<br/>5 Whys / Contributing Factors]
+    R --> S[Continual Improvement<br/>Knowledge Base uppdateras]
+
+    H -->|Fler än 2 gånger på 30 dagar| T[Problem-ticket<br/>permanent åtgärd]
+
+    style A fill:#fff3e0,stroke:#F97316
+    style C fill:#e3f2fd,stroke:#2196F3
+    style D fill:#e3f2fd,stroke:#2196F3
+    style G fill:#ffebee,stroke:#F44336
+    style H fill:#ffebee,stroke:#F44336
+    style J fill:#fce4ec,stroke:#E91E63
+    style K fill:#fce4ec,stroke:#E91E63
+    style Q fill:#e8f5e9,stroke:#4CAF50
+    style T fill:#f3e5f5,stroke:#9C27B0

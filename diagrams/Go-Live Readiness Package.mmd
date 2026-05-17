@@ -1,0 +1,33 @@
+flowchart LR
+    A[1. Cover & Snapshot<br/>Service Definition<br/>Stakeholders & Value Statements<br/>The Four Dimensions<br/>Utility vs Warranty] --> B
+
+    B[2. Service Levels<br/>Internal SLOs<br/>Service Request Handling<br/>SLO targets och mätning] --> C
+
+    C[3. Operational Readiness<br/>Major-Incident Playbook<br/>Problem-Management Approach<br/>Communication Plan<br/>PIR<br/>Continual Improvement<br/>On-call] --> D
+
+    D[4. Change & Release<br/>CAB Design<br/>Go / No-Go Criteria<br/>RFC<br/>Change Enablement / Rollback Plan] --> E
+
+    E{CAB-beslut<br/>Martin Lindqvist<br/>Change Authority}
+
+    E -->|Go| F[NordIQ go-live<br/>om villkor är stängda]
+    E -->|Go med villkor| G[Villkor hanteras<br/>innan release]
+    E -->|No-go| H[Ny RFC-cykel]
+
+    F --> I[Hypercare<br/>SLO-uppföljning<br/>incident och deflection]
+    G --> E
+    H --> A
+
+    I --> J{Rollback-trigger?}
+    J -->|Nej| K[Business as usual<br/>Continual Improvement<br/>Problem Management]
+    J -->|Ja| L[Rollback<br/>NordIQ offline<br/>SharePoint FAQ<br/>manuell first line]
+    L --> H
+
+    style A fill:#e3f2fd,stroke:#2196F3
+    style B fill:#e3f2fd,stroke:#2196F3
+    style C fill:#e3f2fd,stroke:#2196F3
+    style D fill:#e3f2fd,stroke:#2196F3
+    style E fill:#fff9c4,stroke:#F9A825
+    style F fill:#e8f5e9,stroke:#4CAF50
+    style G fill:#fff3e0,stroke:#F97316
+    style H fill:#ffebee,stroke:#F44336
+    style L fill:#ffebee,stroke:#F44336
