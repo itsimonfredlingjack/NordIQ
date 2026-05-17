@@ -6,11 +6,10 @@ Det här är dokumentnavet för NordIQ Go-Live Readiness Package. Rotens [README
 
 | Order | Artifact | File | Use for |
 |-------|----------|------|---------|
-| 1 | Executive Summary | [00-executive-summary.md](00-executive-summary.md) | Snabb CAB-orientering: beslut, rekommendation, nytta, risk och villkor. |
-| 2 | Service Snapshot | [01-service-snapshot.md](01-service-snapshot.md) | Service definition, consumers, stakeholders, value, utility, warranty och Four Dimensions. |
-| 3 | Service Levels & SLOs | [02-service-levels-slo.md](02-service-levels-slo.md) | Mål, SLI/SLO, baselinebehov, go/no-go-kriterier och uppföljning. |
-| 4 | Operational Readiness | [03-operational-readiness.md](03-operational-readiness.md) | Service request flow, incidentnivåer, major incident playbook, handover och on-call. |
-| 5 | Change & Release RFC | [04-change-release-rfc.md](04-change-release-rfc.md) | RFC-NordIQ-001, scope, verifiering före CAB, rollback, hypercare och CAB-beslut. |
+| 1 | Service Snapshot | [01-service-snapshot.md](01-service-snapshot.md) | Service definition, consumers, stakeholders, value, utility, warranty och Four Dimensions. |
+| 2 | Service Levels & SLOs | [02-service-levels-slo.md](02-service-levels-slo.md) | Mål, SLI/SLO, baselinebehov, go/no-go-kriterier och uppföljning. |
+| 3 | Operational Readiness | [03-operational-readiness.md](03-operational-readiness.md) | Service request flow, incidentnivåer, major incident playbook, handover och on-call. |
+| 4 | Change & Release RFC | [04-change-release-rfc.md](04-change-release-rfc.md) | RFC-NordIQ-001, scope, verifiering före CAB, rollback, hypercare och CAB-beslut. |
 
 ## Supporting Registers
 

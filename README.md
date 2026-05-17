@@ -82,8 +82,7 @@ Mermaid source: [diagrams/go-live-readiness-flow.mmd](diagrams/go-live-readiness
 
 | CAB question | Artifact | File |
 |--------------|----------|------|
-| What is the service and value case? | Executive Summary | [docs/00-executive-summary.md](docs/00-executive-summary.md) |
-| How is NordIQ described as a service, not a stack? | Cover & Snapshot / Service Snapshot | [docs/01-service-snapshot.md](docs/01-service-snapshot.md) |
+| What is the service and value case? | Cover & Snapshot / Service Snapshot | [docs/01-service-snapshot.md](docs/01-service-snapshot.md) |
 | What does "good enough" mean before go-live? | Service Levels & SLOs | [docs/02-service-levels-slo.md](docs/02-service-levels-slo.md) |
 | How does NordIQ run and recover when it breaks? | Operational Readiness | [docs/03-operational-readiness.md](docs/03-operational-readiness.md) |
 | What is the change, who decides, and how do we back out? | Change & Release / RFC | [docs/04-change-release-rfc.md](docs/04-change-release-rfc.md) |
