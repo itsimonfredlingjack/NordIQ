@@ -9,7 +9,14 @@ import { useNordIQAgent } from "@/hooks/useNordIQAgent";
 import { useSystemHealth } from "@/hooks/useSystemHealth";
 import { caseFlows, me } from "@/lib/mock-data";
 
-export function ChatView() {
+export function ChatView({
+  onBackToReplay,
+}: {
+  /** When provided, shows a "Back to Shadow Replay" pill in the
+   * header so the demo presenter can swap between the CAB-facing
+   * surface and the employee view without re-loading. */
+  onBackToReplay?: () => void;
+}) {
   const agent = useNordIQAgent();
   const { services } = useSystemHealth(agent.model);
   const [composerValue, setComposerValue] = useState("");
@@ -29,11 +36,11 @@ export function ChatView() {
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [agent.messages, agent.thinking]);
 
-  const handleSend = () => {
+  const handleSend = (images?: string[]) => {
     const text = composerValue.trim();
-    if (!text) return;
+    if (!text && (!images || images.length === 0)) return;
     setComposerValue("");
-    void agent.send(text);
+    void agent.send(text, images);
   };
 
   const handleSuggestion = (prompt: string) => {
@@ -60,8 +67,20 @@ export function ChatView() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top — minimal, just the user chip */}
-        <header className="flex shrink-0 items-center justify-end px-6 py-5">
+        {/* Top — back-pill (only when reached from Shadow Replay) on
+            the left, user chip on the right. */}
+        <header className="flex shrink-0 items-center justify-between px-6 py-5">
+          {onBackToReplay ? (
+            <button
+              type="button"
+              onClick={onBackToReplay}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-[11.5px] text-[var(--color-fg-muted)] transition-colors hover:border-[var(--color-border-2)] hover:text-[var(--color-fg)]"
+            >
+              ← Back to Shadow Replay
+            </button>
+          ) : (
+            <span />
+          )}
           <div className="flex items-center gap-2.5 rounded-full pl-1 pr-3">
             <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--color-surface)] text-[11px] font-semibold text-[var(--color-fg)]">
               {me.initials}
@@ -87,7 +106,7 @@ export function ChatView() {
                   Hi, {me.name.split(" ")[0]}.
                   <br />
                   <span className="text-[var(--color-fg-muted)]">
-                    What do you need today?
+                    Who's joining NordTech?
                   </span>
                 </h1>
               </div>
@@ -98,7 +117,7 @@ export function ChatView() {
                   onChange={setComposerValue}
                   onSubmit={handleSend}
                   size="lg"
-                  placeholder="Ask NordIQ — passwords, access, devices, anything"
+                  placeholder="Paste an email, drop a contract, or describe who's starting"
                   disabled={agent.streaming}
                 />
               </div>
@@ -115,6 +134,7 @@ export function ChatView() {
                   </button>
                 ))}
               </div>
+
             </div>
           </main>
         ) : (
