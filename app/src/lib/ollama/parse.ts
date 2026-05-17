@@ -21,9 +21,6 @@ interface ExtractResult {
   tag: ParsedTag | null;
   /** Parsed IT-intake packet, if the model emitted one in this turn. */
   packet: ServiceRequestPacket | null;
-  /** True if the model has started writing the tag (so we know not to
-   * render the partial fragment yet). */
-  tagInFlight: boolean;
 }
 
 interface ParsedTag {
@@ -106,16 +103,15 @@ export function extract(buf: string, final = false): ExtractResult {
       visible: trimTrailingTagPrefix(workBuf),
       tag: null,
       packet,
-      tagInFlight: false,
     };
   }
   const end = workBuf.indexOf(TAG_CLOSE, lastStart);
   const visible = workBuf.slice(0, lastStart).replace(/\s+$/, "");
   if (end < 0) {
-    return { visible, tag: null, packet, tagInFlight: true };
+    return { visible, tag: null, packet };
   }
   const raw = workBuf.slice(lastStart, end + TAG_CLOSE.length);
-  return { visible, tag: parseTag(raw), packet, tagInFlight: false };
+  return { visible, tag: parseTag(raw), packet };
 }
 
 // ---------------------------------------------------------------------

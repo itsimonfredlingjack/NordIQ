@@ -24,7 +24,6 @@ interface AgentState {
   thinking: boolean; // pre-first-token
   error: string | null;
   model: string;
-  modelHealth: "unknown" | "reachable" | "unreachable";
   /** Telemetry from the last completed turn — used by DevHealthPanel. */
   lastMeta: ollama.ChatMeta | null;
   /** Whether the last turn closed with a valid <NORDIQ /> tag. */
@@ -43,7 +42,6 @@ export function useNordIQAgent() {
       thinking: false,
       error: null,
       model: store.getModel(),
-      modelHealth: "unknown",
       lastMeta: null,
       lastTagValid: null,
     };
@@ -51,26 +49,7 @@ export function useNordIQAgent() {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  // -------------------------------------------------------------------
-  // Health pinger — once on mount, then every 30s.
-  // -------------------------------------------------------------------
-  useEffect(() => {
-    let cancelled = false;
-    const ping = async () => {
-      const h = await ollama.health();
-      if (cancelled) return;
-      setState((s) => ({
-        ...s,
-        modelHealth: h.reachable ? "reachable" : "unreachable",
-      }));
-    };
-    ping();
-    const id = window.setInterval(ping, 30_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, []);
+  // Model-reachability live in useSystemHealth — no duplicate pinger here.
 
   // -------------------------------------------------------------------
   // Prewarm — load the model into memory at app mount so the user's
@@ -304,14 +283,6 @@ export function useNordIQAgent() {
   }, []);
 
   // -------------------------------------------------------------------
-  // setModel() — persists across reloads.
-  // -------------------------------------------------------------------
-  const setModel = useCallback((name: string) => {
-    store.setModel(name);
-    setState((s) => ({ ...s, model: name }));
-  }, []);
-
-  // -------------------------------------------------------------------
   // deriveRecent — re-read store on demand. Used by HistoryRail.
   // -------------------------------------------------------------------
   const recent = useMemo(
@@ -326,7 +297,6 @@ export function useNordIQAgent() {
     send,
     newChat,
     openChat,
-    setModel,
     recent,
   };
 }

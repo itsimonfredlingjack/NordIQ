@@ -3,10 +3,11 @@
 // HTTP client for the local Ollama server. Uses Vite's /ollama proxy
 // in dev so we don't have to touch OLLAMA_ORIGINS.
 //
-// Surfaces three things:
-//   - health()      → cheap reachability check, used by ModelStatusPill
-//   - listModels()  → for a future model picker
-//   - chat()        → AsyncIterable<string> of streamed token chunks
+// Surfaces:
+//   - health()           → cheap reachability check (used by SystemHealthPanel)
+//   - getModelDetails()  → /api/show metadata (base model, family, size)
+//   - preload()          → warm the model into RAM at app mount
+//   - chat()             → AsyncIterable<string> of streamed token chunks
 // =====================================================================
 
 const BASE = "/ollama";
@@ -18,13 +19,6 @@ export interface OllamaMessage {
    * API accepts them as `images[]` on a user message — we just include
    * the field on the OllamaMessage and let JSON.stringify forward it. */
   images?: string[];
-}
-
-export interface OllamaModelInfo {
-  name: string;
-  size: number;
-  parameterSize?: string;
-  family?: string;
 }
 
 export interface ChatMeta {
@@ -76,7 +70,7 @@ export async function health(): Promise<{
 
 // ---------------------------------------------------------------------
 // getModelDetails() — /api/show for one model.
-// Used to surface the underlying base model ("nordiq:1 via gemma4:e2b")
+// Used to surface the underlying base model ("nordiq:2 via gemma4:e2b")
 // in the System Health panel so the demo audience sees what's
 // actually running.
 // ---------------------------------------------------------------------
@@ -122,27 +116,6 @@ export async function getModelDetails(name: string): Promise<ModelDetails> {
   } catch {
     return { name, base: null, family: null, parameterSize: null };
   }
-}
-
-// ---------------------------------------------------------------------
-// listModels() — for the picker.
-// ---------------------------------------------------------------------
-export async function listModels(): Promise<OllamaModelInfo[]> {
-  const r = await fetch(`${BASE}/api/tags`);
-  if (!r.ok) throw new Error(`listModels failed: ${r.status}`);
-  const json = (await r.json()) as {
-    models: Array<{
-      name: string;
-      size: number;
-      details?: { parameter_size?: string; family?: string };
-    }>;
-  };
-  return json.models.map((m) => ({
-    name: m.name,
-    size: m.size,
-    parameterSize: m.details?.parameter_size,
-    family: m.details?.family,
-  }));
 }
 
 // ---------------------------------------------------------------------
@@ -201,8 +174,8 @@ export async function* chat({
       // Off for service-desk turns; we want immediate replies.
       think: false,
       keep_alive: keepAlive,
-      // Sampling params that aren't part of nordiq:1's Modelfile defaults
-      // can still override here. nordiq:1 already pins num_ctx,
+      // Sampling params that aren't part of nordiq:2's Modelfile defaults
+      // can still override here. nordiq:2 already pins num_ctx,
       // temperature, top_k, top_p, repeat_penalty, num_predict.
       options: {
         ...options,

@@ -70,16 +70,6 @@ export function saveChat(chat: StoredChat): void {
   safeWrite(KEY_CHATS, all.slice(0, MAX_CHATS));
 }
 
-export function deleteChat(id: string): void {
-  safeWrite(KEY_CHATS, loadChats().filter((c) => c.id !== id));
-  if (getActive() === id) setActive(null);
-}
-
-export function clearAllChats(): void {
-  safeWrite(KEY_CHATS, []);
-  setActive(null);
-}
-
 // ---------------------------------------------------------------------
 // Active chat id
 // ---------------------------------------------------------------------
@@ -111,14 +101,6 @@ export function getModel(): string {
   }
 }
 
-export function setModel(name: string): void {
-  try {
-    window.localStorage.setItem(KEY_MODEL, name);
-  } catch {
-    // ignore
-  }
-}
-
 // ---------------------------------------------------------------------
 // Title derivation — first ~40 chars of the first user message,
 // trimmed at a word boundary, ellipsised if longer.
@@ -133,19 +115,3 @@ export function deriveTitle(messages: ChatMessage[]): string {
   return (lastSpace > 16 ? cut.slice(0, lastSpace) : cut) + "…";
 }
 
-// ---------------------------------------------------------------------
-// Convenience: make a fresh chat shell.
-// ---------------------------------------------------------------------
-export function newChat(): StoredChat {
-  const now = new Date().toISOString();
-  return {
-    id:
-      typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `c-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    title: "New chat",
-    createdAt: now,
-    updatedAt: now,
-    messages: [],
-  };
-}

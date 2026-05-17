@@ -1,12 +1,17 @@
 // =====================================================================
-// useSystemHealth — health state for the three things NordIQ depends on:
-//   1. Local model (real ping via OllamaAdapter.health())
-//   2. CloudFrame Nordic — hosting (mocked, occasional degradation)
-//   3. Lumeon API — LLM failover (mocked, occasional degradation)
+// useSystemHealth — three rows for the panel.
+//   1. Model            — REAL: pings local Ollama every 30 s.
+//   2. CloudFrame Nordic — SIMULATED: deterministic 3-min cycle, 45 s
+//                          degraded window. Stand-in for what a future
+//                          production deploy of NordIQ would surface
+//                          from the hosting provider's status API.
+//   3. Lumeon API        — SIMULATED: same pattern, offset 90 s. Stands
+//                          in for the (not-yet-wired) failover LLM
+//                          provider.
 //
-// Mocked status flips serve the demo: every ~3 min one supplier flips
-// to "degraded" for ~45s, then recovers. Deterministic per minute so
-// the user can predict it during a walk-through.
+// The simulated rows carry a `subDetail: "simulated"` so the demo
+// audience can see in the panel itself that those flips aren't real
+// supplier telemetry — only the Model row is.
 // =====================================================================
 
 import { useEffect, useState } from "react";
@@ -48,19 +53,21 @@ export function useSystemHealth(model: string) {
       id: "hosting",
       label: "Hosting",
       detail: "CloudFrame Nordic",
+      subDetail: "simulated",
       status: "operational",
     },
     {
       id: "llm",
       label: "LLM API",
       detail: "Lumeon (failover)",
+      subDetail: "simulated",
       status: "operational",
       note: "Idle — local model active",
     },
   ]);
 
   // Real model ping every 30s + look up the underlying base model
-  // once per model change so the demo can show "nordiq:1 · gemma4:e2b".
+  // once per model change so the demo can show "nordiq:2 · gemma4:e2b".
   useEffect(() => {
     let cancelled = false;
 
